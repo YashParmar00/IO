@@ -26,18 +26,41 @@ namespace IO.Game.UI
             if (gameManager != null)
                 gameManager.StateChanged += ApplyState;
 
-            if (pauseButton != null)
-                pauseButton.onClick.AddListener(Pause);
-            if (resumeButton != null)
-                resumeButton.onClick.AddListener(Resume);
-            if (restartButton != null)
-                restartButton.onClick.AddListener(Restart);
+            BindButtonListeners();
         }
 
         private void Start()
         {
+            if (gameManager == null)
+                gameManager = FindFirstObjectByType<GameManager>();
+
+            BindButtonListeners();
+
             if (gameManager != null)
+            {
+                gameManager.StateChanged -= ApplyState;
+                gameManager.StateChanged += ApplyState;
                 ApplyState(gameManager.State);
+            }
+        }
+
+        private void BindButtonListeners()
+        {
+            if (pauseButton != null)
+            {
+                pauseButton.onClick.RemoveListener(Pause);
+                pauseButton.onClick.AddListener(Pause);
+            }
+            if (resumeButton != null)
+            {
+                resumeButton.onClick.RemoveListener(Resume);
+                resumeButton.onClick.AddListener(Resume);
+            }
+            if (restartButton != null)
+            {
+                restartButton.onClick.RemoveListener(Restart);
+                restartButton.onClick.AddListener(Restart);
+            }
         }
 
         private void OnDisable()
