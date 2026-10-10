@@ -1,40 +1,60 @@
 # Unity Editor Setup and Validation
 
-## 1. Open the project
+## 1. Use the pinned Editor
 
-1. Install Unity 6.3 LTS 6000.3.26f1 using Unity Hub.
-2. In Unity Hub, choose **Add > Add project from disk** and select this repository root.
-3. Let Package Manager resolve dependencies. If Unity asks to enable the new Input System, accept it. Otherwise open Project Settings > Player and set Active Input Handling to **Input System Package (New)** or **Both**, then restart the Editor if prompted.
-4. Install Android Build Support, Android SDK & NDK Tools, and OpenJDK in Unity Hub if Android is the first target. Unity 6.3 uses NDK r27c and JDK 17; let Unity Hub manage these versions.
+1. Install Unity 6.3 LTS 6000.3.26f1 with Unity Hub.
+2. In Unity Hub choose **Add > Add project from disk** and select the repository root.
+3. Let Package Manager resolve Packages. Input System 1.20.1 is pinned for this Editor family. If prompted, set Active Input Handling to **Input System Package (New)** or **Both** and restart.
+4. For Android, install Android Build Support, Android SDK & NDK Tools and OpenJDK through Unity Hub. Unity's dependency table for 6000.3.26f1+ lists SDK Build Tools 36.0.0, command-line tools 16, platform-tools 37.0.1, NDK r27c and OpenJDK 17.
+5. Wait for the first import to complete and inspect the Console.
 
-## 2. Generate a demo scene
+## 2. Generate scene and prefabs
 
-In Unity Editor, choose **Tools > IO > Create-Reset Demo Scene and Prefabs** and confirm. The Editor script generates placeholder art, prefabs, Main.unity, a camera follow, food spawner, two local bot worms, score HUD, pause/game-over/restart controls, EventSystem, and Build Settings scene registration.
+In Unity Editor select **Tools > IO > Create-Reset Demo Scene and Prefabs** and confirm. It creates:
 
-The generator intentionally overwrites its starter scene and the three starter prefabs (BodySegment, Food, PlayerWorm). Do not rerun it after replacing those files with custom work unless you want to reset them. It does not replace existing placeholder sprite files.
+- Assets/Settings/GameConfig.asset from GameConfig.cs (preserving an existing tuning asset).
+- Original placeholder circles in Assets/Art/Sprites.
+- Assets/Prefabs/BodySegment.prefab, Food.prefab and PlayerWorm.prefab.
+- Assets/Scenes/Main.unity with GameRoot, FoodSpawner/ArenaBounds, Main Camera, player, two bot worms, HUD, EventSystem.
+- A Main scene entry in Build Settings, without dropping the other scene entries.
+- Portrait default orientation in Player Settings.
 
-## 3. What the generator creates
+**Destructive warning:** the menu item replaces Main.unity and the three named starter prefabs. It does not replace existing placeholder sprite PNGs or overwrite an existing GameConfig.asset. Run it again only if you intend to reset those generated scene/prefab files.
 
-- PlayerWorm: SpriteRenderer, kinematic Rigidbody2D, trigger CircleCollider2D, PlayerController, and WormController. The Rigidbody2D allows trigger callbacks for head-to-head and head-to-body hits.
-- BodySegment: SpriteRenderer, trigger CircleCollider2D, and WormSegment.
-- Food: SpriteRenderer, trigger CircleCollider2D, and FoodItem.
-- GameRoot: GameManager and ScoreManager.
-- FoodSpawner: capped object pool with 90 target food items and a 32 × 20 world area.
-- Main Camera: orthographic camera with CameraFollow.
-- Canvas: current/best score, pause button, pause/game-over panel, resume/restart buttons, and Input System EventSystem.
-- BotWorm_A and BotWorm_B: simple nearest-food-seeking AI.
+## 3. Verify component assignments
 
-## 4. Validate before adding features
+- **GameRoot:** GameManager references GameConfig; ScoreManager loads local best score.
+- **FoodSpawner:** ArenaBounds and FoodSpawner share the generated GameConfig, and FoodSpawner references Food.prefab.
+- **PlayerWorm:** Rigidbody2D is Kinematic, head collider is Trigger, and WormInputReader references Main Camera. PlayerController references GameConfig and the reader. WormBody references GameConfig and BodySegment.prefab. WormController references WormBody, ScoreManager and ArenaBounds. WormCollisionHandler references WormController.
+- **Bot worms:** same movement/body/controller/collision components plus WormAIController; each AI component references GameConfig, movement, worm rules and FoodSpawner.
+- **BodySegment:** SpriteRenderer, trigger CircleCollider2D and WormSegment. Body segments are separate world objects, not children of the head.
+- **Food:** SpriteRenderer, trigger CircleCollider2D and FoodItem.
+- **HUD:** CanvasScaler uses 1080 x 1920 reference resolution for portrait. ScoreHUD references ScoreManager and its score labels. GameFlowUI references GameManager, status panel and the Pause/Resume/Restart buttons.
+- **EventSystem:** EventSystem and InputSystemUIInputModule. The module receives its default input actions when Unity enables it.
 
-- Open Assets/Scenes/Main.unity and enter Play mode.
-- Confirm mouse steering and WASD/arrows work in the Editor.
-- Eat food and verify score changes, the food respawns, and body segments grow.
-- Confirm the camera follows, bots move toward food, and the pause/restart buttons work.
-- Check that colliding with another worm's head/body ends the player run.
-- Confirm the Console has no compile errors or missing references.
-- Test on a physical Android phone. Test portrait layout, touch steering, background/foreground transitions, performance, and battery/thermal behavior.
-- Do not publish until collisions, game-over/restart flow, UI scaling, and device performance have been verified.
+If a reference is missing, select the component in the Inspector, reassign the expected field and save the scene/prefab. Prefer updating the generator if a generated assignment is wrong, so the next regeneration stays correct.
 
-## 5. Important limits
+## 4. Manual Play Mode checks
 
-This environment can commit code to GitHub but cannot execute Unity Editor or Android builds. The generator is committed, but the generated scene/prefabs exist only after you run the menu item locally. The prototype is not release-ready; inspect and fix any Editor/runtime issues before continuing.
+Follow docs/TEST_PLAN.md. At minimum:
+
+1. Player moves and turns with mouse/pointer and WASD/arrows.
+2. Food is collected once, score updates, growth adds body segments, and food replenishes.
+3. Head and tail segments follow through turns without obvious gaps or severe jitter.
+4. Bots use food targets, wander when needed, and pause with the game.
+5. Head/body collisions and arena exits trigger the intended player game-over or bot-removal behavior.
+6. Pause, resume and restart restore timeScale correctly.
+7. High score persists after game-over/backgrounding and appears after reload.
+8. Unity Console stays clear of compile errors, missing references and runtime exceptions.
+
+## 5. Android device checks
+
+- Build and run on at least one physical phone. Confirm touch steering and ensure tapping UI does not steer the worm.
+- Check portrait sizing on different screen ratios; make sure score labels and buttons respect safe areas.
+- Check app pause/resume, frame pacing, memory, heat and battery during longer runs.
+- Use the Unity Profiler before increasing body length, food count, effects or bot count.
+- Configure app identifier, icons, signing and release build settings before publishing.
+
+## 6. What has not been verified automatically
+
+The GitHub connection can write source files, but it cannot execute Unity Editor or Android builds. GitHub Actions checks project structure, JSON, version pins and simple source invariants only. A green CI run is not proof of C# compilation, scene validity, gameplay, or device performance.
