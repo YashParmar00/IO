@@ -5,7 +5,7 @@ using IO.Game.Core;
 
 namespace IO.Game.Gameplay
 {
-    /// <summary>Owns worm trail history and body segments; collision and score stay in WormController.</summary>
+    /// <summary>Owns the body's trail history, segment creation, and segment positions.</summary>
     [DisallowMultipleComponent]
     public sealed class WormBody : MonoBehaviour
     {
@@ -53,7 +53,7 @@ namespace IO.Game.Gameplay
             if (segmentPrefab == null || amount <= 0)
                 return;
 
-            int countToAdd = Mathf.Min(amount, maximumSegments - segments.Count);
+            int countToAdd = Mathf.Min(amount, Mathf.Max(0, maximumSegments - segments.Count));
             WormController owner = GetComponent<WormController>();
 
             for (int i = 0; i < countToAdd; i++)
@@ -128,7 +128,7 @@ namespace IO.Game.Gameplay
             int segmentIndex = 0;
             float distanceBeforeEdge = 0f;
 
-            // One traversal of the trail per frame keeps body-follow work bounded.
+            // Traverse trail once per frame: amortized cost follows path length plus body length.
             for (int pathIndex = 1; pathIndex < path.Count && segmentIndex < segments.Count; pathIndex++)
             {
                 Vector3 newer = path[pathIndex - 1];
