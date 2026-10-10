@@ -23,17 +23,36 @@ namespace IO.Game.UI
             ScoreChanged?.Invoke(Score, HighScore);
         }
 
+        private void OnEnable()
+        {
+            SubscribeToGameManager();
+        }
+
         private void Start()
         {
+            // Start runs after all scene Awake calls, so the singleton is available here.
+            SubscribeToGameManager();
+        }
+
+        private void SubscribeToGameManager()
+        {
+            if (gameManager != null)
+                gameManager.StateChanged -= HandleGameStateChanged;
+
             gameManager = GameManager.Instance;
             if (gameManager != null)
+            {
+                gameManager.StateChanged -= HandleGameStateChanged;
                 gameManager.StateChanged += HandleGameStateChanged;
+            }
         }
 
         private void OnDisable()
         {
             if (gameManager != null)
                 gameManager.StateChanged -= HandleGameStateChanged;
+
+            SaveHighScoreIfNeeded();
         }
 
         private void OnApplicationPause(bool pauseStatus)
