@@ -4,11 +4,11 @@ An original Unity 2D mobile arcade prototype inspired by the broader worm-arena 
 
 ## Toolchain
 
-- **Unity 6.3 LTS, 6000.3.25f1** (recommended baseline; install via Unity Hub).
+- **Unity 6.3 LTS, 6000.3.26f1** (recommended baseline; install via Unity Hub).
 - **Input System 1.20.1** for touch, pointer, and keyboard steering.
 - Android Build Support (Android SDK & NDK Tools and OpenJDK) for Android builds.
 
-Unity released 6000.3.25f1 on 24 September 2026. See [official release notes](https://unity.com/releases/editor/whats-new/6000.3.25f1). iOS builds additionally require macOS and Xcode.
+Unity released 6000.3.26f1 on 8 October 2026. See [official release notes](https://unity.com/releases/editor/whats-new/6000.3.26f1). iOS builds additionally require macOS and Xcode.
 
 ## Included
 
@@ -23,7 +23,7 @@ Unity released 6000.3.25f1 on 24 September 2026. See [official release notes](ht
 
 ## Create the demo
 
-1. Install Unity 6.3 LTS 6000.3.25f1 through Unity Hub, then open this repository folder.
+1. Install Unity 6.3 LTS 6000.3.26f1 through Unity Hub, then open this repository folder.
 2. Let Package Manager resolve dependencies. In Project Settings > Player, set Active Input Handling to **Input System Package (New)** or **Both** if Unity asks.
 3. In the Editor menu, choose **Tools > IO > Create-Reset Demo Scene and Prefabs** and confirm. This generates original placeholder circle sprites, BodySegment/Food/PlayerWorm prefabs, Main.unity, HUD, two bot worms, and adds the scene to Build Settings.
 4. Open Assets/Scenes/Main.unity and press Play. Use mouse/pointer or WASD/arrow keys to steer. Try the pause and restart buttons.
