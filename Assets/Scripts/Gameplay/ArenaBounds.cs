@@ -37,6 +37,12 @@ namespace IO.Game.Gameplay
             return Center + new Vector2(Random.Range(-maxX, maxX), Random.Range(-maxY, maxY));
         }
 
+        private void OnDrawGizmosSelected()
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireCube(transform.position, new Vector3(size.x, size.y, 0.1f));
+        }
+
         private void OnValidate()
         {
             size = new Vector2(Mathf.Max(4f, size.x), Mathf.Max(4f, size.y));
