@@ -83,7 +83,7 @@ namespace IO.Game.Gameplay
             gameObject.SetActive(false);
         }
 
-        private void OnTriggerEnter2D(Collider2D other)
+        public void HandleTriggerContact(Collider2D other)
         {
             WormController otherHead = other.GetComponentInParent<WormController>();
             if (otherHead != null && otherHead != this)
