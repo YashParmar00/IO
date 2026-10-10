@@ -89,10 +89,16 @@ namespace IO.Game.EditorTools
 
             CreateHUD(root.GetComponent<GameManager>(), scoreManager);
 
-            EditorBuildSettings.scenes = new[]
-            {
-                new EditorBuildSettingsScene(ScenePath, true)
-            };
+            System.Collections.Generic.List<EditorBuildSettingsScene> buildScenes =
+                new System.Collections.Generic.List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+            int mainSceneIndex = buildScenes.FindIndex(item => item.path == ScenePath);
+            if (mainSceneIndex >= 0)
+                buildScenes[mainSceneIndex] = new EditorBuildSettingsScene(ScenePath, true);
+            else
+                buildScenes.Add(new EditorBuildSettingsScene(ScenePath, true));
+
+            EditorBuildSettings.scenes = buildScenes.ToArray();
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -242,9 +248,8 @@ namespace IO.Game.EditorTools
             SetObjectReference(flow, "restartButton", restartButton);
             panel.SetActive(false);
 
-            GameObject eventSystem = new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
-            InputSystemUIInputModule uiModule = eventSystem.GetComponent<InputSystemUIInputModule>();
-            uiModule.AssignDefaultActions();
+            // InputSystemUIInputModule assigns its default actions automatically when enabled.
+            new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
         }
 
         private static Button CreateButton(Transform parent, string objectName, string label,
