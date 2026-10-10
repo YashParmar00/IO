@@ -35,7 +35,23 @@ namespace IO.Game.Gameplay
 
         private void Start()
         {
+            SeedInitialPath();
             Grow(startingSegments);
+        }
+
+        private void SeedInitialPath()
+        {
+            path.Clear();
+            Vector3 head = transform.position;
+            Vector3 tailDirection = -transform.up;
+            path.Add(head);
+
+            float resolution = Mathf.Max(0.01f, pathResolution);
+            float requiredLength = (startingSegments + 2) * segmentSpacing + resolution;
+            int sampleCount = Mathf.CeilToInt(requiredLength / resolution);
+
+            for (int i = 1; i <= sampleCount; i++)
+                path.Add(head + tailDirection * (i * resolution));
         }
 
         private void Update()
