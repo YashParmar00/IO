@@ -8,7 +8,7 @@ Build an original, portrait-first, offline worm-arena arcade game. Use the commo
 
 ## Engine and packages
 
-- **Unity 6.3 LTS 6000.3.25f1:** official release notes list this patch as released on 24 September 2026. It is pinned in ProjectSettings/ProjectVersion.txt to make the team use one Editor baseline.
+- **Unity 6.3 LTS 6000.3.26f1:** official release notes list this patch as released on 8 October 2026. Changeset `de8167e7440c` is pinned in ProjectSettings/ProjectVersion.txt to make the team use one Editor baseline.
 - **Input System 1.20.1:** the current 6000.3 package listing documents this input package family. It supports pointer, keyboard, gamepad, and touch input.
 - **2D Animation 13.0.6:** version released for Unity 6000.3. It is included for future sprite-skeletal animation/skins; the current prototype does not depend on it.
 - **2D Sprite, 2D Tilemap, and uGUI:** core packages are tied to the Editor version. Keep their manifest entries aligned with the selected Editor; if Package Manager flags a core-package version, recreate/update the project through that Editor rather than manually downgrading it.
@@ -25,7 +25,7 @@ Build an original, portrait-first, offline worm-arena arcade game. Use the commo
 
 ## Primary references
 
-- [Unity 6000.3.25f1 official release notes](https://unity.com/releases/editor/whats-new/6000.3.25f1)
+- [Unity 6000.3.26f1 official release notes](https://unity.com/releases/editor/whats-new/6000.3.26f1)
 - [Unity 6.3 LTS manual and version changes](https://docs.unity.com/en-us/engine/6000.3/manual/whats-new)
 - [Unity 6.3 released packages](https://docs.unity.com/en-us/engine/6000.3/manual/packages-list/packages-all/pack-safe)
 - [Input System package for Unity 6.3](https://docs.unity.com/en-us/engine/6000.3/manual/packages-list/packages-all/pack-safe/com-unity-inputsystem)
