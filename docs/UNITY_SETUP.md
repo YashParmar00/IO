@@ -2,10 +2,10 @@
 
 ## 1. Open the project
 
-1. Install Unity 6.3 LTS 6000.3.25f1 using Unity Hub.
+1. Install Unity 6.3 LTS 6000.3.26f1 using Unity Hub.
 2. In Unity Hub, choose **Add > Add project from disk** and select this repository root.
 3. Let Package Manager resolve dependencies. If Unity asks to enable the new Input System, accept it. Otherwise open Project Settings > Player and set Active Input Handling to **Input System Package (New)** or **Both**, then restart the Editor if prompted.
-4. Install Android Build Support, Android SDK & NDK Tools, and OpenJDK in Unity Hub if Android is the first target.
+4. Install Android Build Support, Android SDK & NDK Tools, and OpenJDK in Unity Hub if Android is the first target. Unity 6.3 uses NDK r27c and JDK 17; let Unity Hub manage these versions.
 
 ## 2. Generate a demo scene
 
