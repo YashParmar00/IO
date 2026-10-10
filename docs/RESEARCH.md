@@ -8,7 +8,7 @@ Build an original, portrait-first, offline worm-arena arcade game. Use the commo
 
 ## Engine and packages
 
-- **Unity 6.3 LTS (6000.3 editor family):** use the latest 6000.3 patch available in Unity Hub. Unity's docs provide a versioned 6000.3 LTS manual and package catalog.
+- **Unity 6.3 LTS 6000.3.25f1:** official release notes list this patch as released on 24 September 2026. It is pinned in ProjectSettings/ProjectVersion.txt to make the team use one Editor baseline.
 - **Input System 1.20.1:** the current 6000.3 package listing documents this input package family. It supports pointer, keyboard, gamepad, and touch input.
 - **2D Animation 13.0.6:** version released for Unity 6000.3. It is included for future sprite-skeletal animation/skins; the current prototype does not depend on it.
 - **2D Sprite, 2D Tilemap, and uGUI:** core packages are tied to the Editor version. Keep their manifest entries aligned with the selected Editor; if Package Manager flags a core-package version, recreate/update the project through that Editor rather than manually downgrading it.
@@ -16,15 +16,16 @@ Build an original, portrait-first, offline worm-arena arcade game. Use the commo
 ## Architecture decisions
 
 1. **Single-player before networking.** Bots run locally and are not real multiplayer opponents. Network play needs authoritative rules, latency handling, reconnects, cheating controls, and backend infrastructure; it is a separate milestone.
-2. **Transform-driven worm movement.** The worm is an arcade steering object rather than a realistic rigid-body simulation. Body transforms sample the head's recent path; Rigidbody2D is used for trigger event setup, not for driving movement.
+2. **Transform-driven worm path with kinematic movement.** The worm is an arcade steering object rather than a realistic rigid-body simulation. Head position advances through Rigidbody2D.MovePosition while body transforms sample the head's recent path.
 3. **Pool frequently respawned food.** Unity's UnityEngine.Pool API reduces repeated instantiate/destroy overhead and garbage-collection pressure. Keep a capped active count.
-4. **Separate responsibilities.** GameManager owns run state; PlayerController handles input and heading; WormController owns tail path/growth; FoodSpawner owns food lifecycle; ScoreManager owns score persistence; HUD scripts only display state.
+4. **Separate responsibilities.** GameManager owns run state; PlayerController handles input and heading; WormController owns tail path/growth and arena exits; FoodSpawner owns food lifecycle; ScoreManager owns score persistence; HUD scripts only display state.
 5. **Local best score only for now.** PlayerPrefs is appropriate for simple, non-sensitive local preferences and an offline high score; it is not encrypted and must never store secrets. Cloud save can be evaluated later if cross-device progression is needed.
-6. **Build an actual scene in Unity Editor.** Scene and prefab files contain serialized references and should be authored and verified with the selected Editor. This repo has scripts and setup instructions, not a verified playable scene/build yet.
+6. **Generate scene and prefabs inside Unity Editor.** The committed editor utility creates original placeholder sprites, PlayerWorm/BodySegment/Food prefabs, Main.unity, a camera, bots, score HUD, pause/game-over/restart UI, and Build Settings entry. Generated Unity assets are only created when the user runs the menu item.
 7. **Measure on phones.** Start with capped entities and pooling, then profile on low/mid-range Android hardware before adopting heavier effects or adding lots of bodies.
 
 ## Primary references
 
+- [Unity 6000.3.25f1 official release notes](https://unity.com/releases/editor/whats-new/6000.3.25f1)
 - [Unity 6.3 LTS manual and version changes](https://docs.unity.com/en-us/engine/6000.3/manual/whats-new)
 - [Unity 6.3 released packages](https://docs.unity.com/en-us/engine/6000.3/manual/packages-list/packages-all/pack-safe)
 - [Input System package for Unity 6.3](https://docs.unity.com/en-us/engine/6000.3/manual/packages-list/packages-all/pack-safe/com-unity-inputsystem)
@@ -38,7 +39,8 @@ Build an original, portrait-first, offline worm-arena arcade game. Use the commo
 ## Known limitations
 
 - No Unity Editor build/import has been run from this connected environment.
-- No finished sprites, prefabs, scene, animation, sound, final game-over flow, or mobile build is checked in yet.
+- The editor utility is committed but has not been executed here. Review generated output and fix any Console errors before treating the demo as playable.
+- No final art, polished animation, production audio, monetization, backend, or online multiplayer is included.
 - Food trigger events require a correctly configured Collider2D setup with at least one Rigidbody2D in each interacting pair, according to Unity's 2D physics rules.
 - Current AI only steers toward the nearest available food or wanders; it is not competitive or human-like AI.
 - The current score/high score is local to one device/install.
