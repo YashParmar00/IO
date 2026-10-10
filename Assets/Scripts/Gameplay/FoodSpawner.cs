@@ -47,6 +47,9 @@ namespace IO.Game.Gameplay
 
         private void Update()
         {
+            if (IO.Game.Core.GameManager.Instance != null && !IO.Game.Core.GameManager.Instance.CanMove)
+                return;
+
             int missing = targetFoodCount - activeFoods.Count;
             int spawnThisFrame = Mathf.Min(Mathf.Max(0, missing), 3);
             for (int i = 0; i < spawnThisFrame; i++)
