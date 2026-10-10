@@ -22,6 +22,15 @@ namespace IO.Game.UI
                     scoreManager != null ? scoreManager.HighScore : 0);
         }
 
+        private void Start()
+        {
+            if (scoreManager == null)
+                scoreManager = FindFirstObjectByType<ScoreManager>();
+
+            Refresh(scoreManager != null ? scoreManager.Score : 0,
+                    scoreManager != null ? scoreManager.HighScore : 0);
+        }
+
         private void OnDisable()
         {
             if (scoreManager != null)
