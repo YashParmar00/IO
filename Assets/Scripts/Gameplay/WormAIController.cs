@@ -34,6 +34,9 @@ namespace IO.Game.Gameplay
 
         private void Update()
         {
+            if (IO.Game.Core.GameManager.Instance != null && !IO.Game.Core.GameManager.Instance.CanMove)
+                return;
+
             if (movement == null || foodSpawner == null)
                 return;
 
