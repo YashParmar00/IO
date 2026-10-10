@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using IO.Game.Config;
 
 namespace IO.Game.Core
 {
@@ -14,6 +15,8 @@ namespace IO.Game.Core
     /// <summary>Owns the current run state. Place one instance in the game scene.</summary>
     public sealed class GameManager : MonoBehaviour
     {
+        [SerializeField] private GameConfig gameConfig;
+
         public static GameManager Instance { get; private set; }
 
         public GameState State { get; private set; } = GameState.Playing;
@@ -30,7 +33,7 @@ namespace IO.Game.Core
 
             Instance = this;
             Time.timeScale = 1f;
-            Application.targetFrameRate = 60;
+            Application.targetFrameRate = gameConfig != null ? gameConfig.TargetFrameRate : 60;
         }
 
         public void StartRun() => SetState(GameState.Playing);
