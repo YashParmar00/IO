@@ -52,7 +52,7 @@ namespace IO.Game.Core
                 SetState(GameState.GameOver);
         }
 
-        public void ResetRun() => SetState(GameState.Ready);
+        public void ResetRun() => SetState(GameState.Playing);
 
         private void SetState(GameState nextState)
         {
