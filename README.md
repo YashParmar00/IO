@@ -107,12 +107,12 @@ Directories containing only a .gitkeep marker are intentional placeholders: Git 
 
 | File | Responsibility | Put this kind of logic here |
 |---|---|---|
-| Assets/Scripts/Gameplay/ArenaBounds.cs | Single source of truth for the rectangular game arena. | Bounds checks and safe random points inside the arena. Change world size in GameConfig or this component's Inspector field; don't hard-code separate bounds into AI and food code. |
+| Assets/Scripts/Gameplay/ArenaBounds.cs | Single source of truth for the rectangular game arena. | Bounds checks, safe random points and a Scene-view wire gizmo. Change world size in GameConfig or this component's Inspector field; don't hard-code separate bounds into AI and food code. |
 | Assets/Scripts/Gameplay/FoodSpawner.cs | Owns food lifetime and placement. | Unity ObjectPool setup, active-food tracking, refill limit, random in-arena positions and nearest-food queries. Keep collectibles themselves lightweight. |
 | Assets/Scripts/Gameplay/FoodItem.cs | Represents one collectible food item. | Trigger-based pickup, one-time consumption guard, score value, growth value and simple score-value visuals. It asks the worm to eat, then returns itself to FoodSpawner's pool. |
 | Assets/Scripts/Gameplay/WormController.cs | Applies worm gameplay rules and coordinates its components. | Player-versus-bot ownership, scoring on food pickup, arena exits, collision consequences and removing a defeated bot. It delegates body operations to WormBody and trigger detection to WormCollisionHandler. |
 | Assets/Scripts/Gameplay/WormBody.cs | Owns trail history and body segments for one worm. | Initial trail seeding, creating segments, growth, storing recent head positions, placing segments along that path, and hiding segments when a bot is removed. It does not read input or award points. |
-| Assets/Scripts/Gameplay/WormCollisionHandler.cs | Detects trigger contacts on the head and passes them to WormController. | Classifying the other head or body segment and forwarding the contact. Put collision sensing here; put the outcome (end run or remove bot) in WormController. |
+| Assets/Scripts/Gameplay/WormCollisionHandler.cs | Detects trigger contacts on the head and passes them to WormController. | Keep this component thin: receive OnTriggerEnter2D and forward the other Collider2D to WormController.HandleTriggerContact. Classification and consequences belong in WormController. |
 | Assets/Scripts/Gameplay/WormSegment.cs | Marks each tail segment and identifies its owning worm. | Owner reference assigned by WormBody when a segment is created. Avoid movement, score, or AI logic here. |
 | Assets/Scripts/Gameplay/WormAIController.cs | Provides the basic offline bot behavior. | Periodically selecting nearby food, setting an external steering target, wandering when needed, and applying bot balance values. It reuses PlayerController/WormInputReader/WormBody/WormController instead of reimplementing a separate worm. |
 
