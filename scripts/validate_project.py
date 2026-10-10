@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -133,6 +134,11 @@ def main() -> None:
             fail(f"Empty C# script: {path.relative_to(ROOT)}")
         if source.count("{") != source.count("}"):
             fail(f"Unbalanced C# braces: {path.relative_to(ROOT)}")
+
+        declared_types = re.findall(r"\\b(?:class|struct|enum)\\s+([A-Za-z_]\\w*)", source)
+        if path.stem not in declared_types:
+            fail(f"Main type name should match file name: {path.relative_to(ROOT)}")
+
         checked_scripts += 1
 
     print(f"Repository sanity checks passed. {checked_scripts} C# scripts inspected.")
