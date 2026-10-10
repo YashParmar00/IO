@@ -1,16 +1,14 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using IO.Game.Config;
 
 namespace IO.Game.Input
 {
-    /// <summary>Reads player input or a supplied bot target. Movement code consumes only a direction vector.</summary>
+    /// <summary>Reads touch/pointer/keyboard input or a supplied bot target; never moves the GameObject.</summary>
     [DisallowMultipleComponent]
     public sealed class WormInputReader : MonoBehaviour
     {
         [SerializeField] private Camera worldCamera;
-        [SerializeField] private GameConfig gameConfig;
         [SerializeField] private bool acceptPlayerInput = true;
 
         private Vector2? externalTarget;
