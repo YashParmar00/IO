@@ -18,12 +18,15 @@ namespace IO.Game.Player
 
         private Vector2 heading = Vector2.up;
         private Vector2? externalTarget;
+        private Rigidbody2D body;
 
         public float MoveSpeed => moveSpeed;
         public Vector2 Heading => heading;
 
         private void Awake()
         {
+            body = GetComponent<Rigidbody2D>();
+
             if (worldCamera == null)
                 worldCamera = Camera.main;
 
@@ -46,8 +49,19 @@ namespace IO.Game.Player
                 heading = new Vector2(Mathf.Cos(radians), Mathf.Sin(radians)).normalized;
             }
 
-            transform.position += (Vector3)(heading * moveSpeed * Time.deltaTime);
             transform.up = heading;
+        }
+
+        private void FixedUpdate()
+        {
+            if (GameManager.Instance != null && !GameManager.Instance.CanMove)
+                return;
+
+            Vector2 nextPosition = (Vector2)transform.position + heading * moveSpeed * Time.fixedDeltaTime;
+            if (body != null)
+                body.MovePosition(nextPosition);
+            else
+                transform.position = nextPosition;
         }
 
         public void SetSteeringTarget(Vector2 worldPosition) => externalTarget = worldPosition;
