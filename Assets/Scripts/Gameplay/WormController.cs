@@ -15,6 +15,7 @@ namespace IO.Game.Gameplay
         [SerializeField, Min(0.01f)] private float pathResolution = 0.06f;
         [SerializeField, Min(1)] private int maximumSegments = 500;
         [SerializeField] private ScoreManager scoreManager;
+        [SerializeField] private FoodSpawner arenaSpawner;
 
         private readonly List<Transform> segments = new List<Transform>();
         private readonly List<Vector3> path = new List<Vector3>();
@@ -26,6 +27,8 @@ namespace IO.Game.Gameplay
         {
             if (scoreManager == null)
                 scoreManager = FindFirstObjectByType<ScoreManager>();
+            if (arenaSpawner == null)
+                arenaSpawner = FindFirstObjectByType<FoodSpawner>();
 
             path.Add(transform.position);
         }
@@ -37,6 +40,12 @@ namespace IO.Game.Gameplay
 
         private void Update()
         {
+            if (arenaSpawner != null && !arenaSpawner.IsInsideArena(transform.position))
+            {
+                HandleArenaExit();
+                return;
+            }
+
             RecordHeadPath();
             UpdateBodySegments();
         }
@@ -84,14 +93,32 @@ namespace IO.Game.Gameplay
             }
             else
             {
-                foreach (Transform segment in segments)
-                {
-                    if (segment != null)
-                        segment.gameObject.SetActive(false);
-                }
-
-                gameObject.SetActive(false);
+                RemoveBotFromArena();
             }
+        }
+
+        private void HandleArenaExit()
+        {
+            if (IsPlayerControlled)
+            {
+                if (GameManager.Instance != null)
+                    GameManager.Instance.EndRun();
+            }
+            else
+            {
+                RemoveBotFromArena();
+            }
+        }
+
+        private void RemoveBotFromArena()
+        {
+            foreach (Transform segment in segments)
+            {
+                if (segment != null)
+                    segment.gameObject.SetActive(false);
+            }
+
+            gameObject.SetActive(false);
         }
 
         private void RecordHeadPath()
