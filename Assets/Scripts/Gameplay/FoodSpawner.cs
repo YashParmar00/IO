@@ -1,12 +1,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
+using IO.Game.Config;
+using IO.Game.Core;
 
 namespace IO.Game.Gameplay
 {
-    /// <summary>Maintains a bounded number of food items using Unity's built-in object pool.</summary>
+    /// <summary>Owns food pooling, placement, refill, and nearest-food queries.</summary>
+    [DisallowMultipleComponent]
     public sealed class FoodSpawner : MonoBehaviour
     {
+        [SerializeField] private GameConfig gameConfig;
+        [SerializeField] private ArenaBounds arenaBounds;
         [SerializeField] private FoodItem foodPrefab;
         [SerializeField, Min(1)] private int targetFoodCount = 90;
         [SerializeField, Min(1)] private int maxPoolSize = 160;
@@ -17,11 +22,25 @@ namespace IO.Game.Gameplay
         private readonly HashSet<FoodItem> activeFoods = new HashSet<FoodItem>();
 
         public int ActiveFoodCount => activeFoods.Count;
-        public Vector2 ArenaSize => arenaSize;
-        public Vector2 ArenaCenter => transform.position;
+        public Vector2 ArenaSize => arenaBounds != null ? arenaBounds.Size : arenaSize;
+        public Vector2 ArenaCenter => arenaBounds != null ? arenaBounds.Center : (Vector2)transform.position;
 
         private void Awake()
         {
+            if (arenaBounds == null)
+                arenaBounds = GetComponent<ArenaBounds>();
+
+            if (gameConfig != null)
+            {
+                targetFoodCount = gameConfig.TargetFoodCount;
+                maxPoolSize = gameConfig.MaximumPooledFood;
+                arenaSize = gameConfig.ArenaSize;
+                scoreRange = new Vector2Int(gameConfig.MinimumFoodScore, gameConfig.MaximumFoodScore);
+            }
+
+            targetFoodCount = Mathf.Max(1, targetFoodCount);
+            maxPoolSize = Mathf.Max(targetFoodCount, maxPoolSize);
+
             if (foodPrefab == null)
             {
                 Debug.LogError("FoodSpawner requires a FoodItem prefab.", this);
@@ -36,7 +55,7 @@ namespace IO.Game.Gameplay
                 OnDestroyPooledFood,
                 true,
                 Mathf.Min(targetFoodCount, maxPoolSize),
-                Mathf.Max(1, maxPoolSize));
+                maxPoolSize);
         }
 
         private void Start()
@@ -47,7 +66,7 @@ namespace IO.Game.Gameplay
 
         private void Update()
         {
-            if (IO.Game.Core.GameManager.Instance != null && !IO.Game.Core.GameManager.Instance.CanMove)
+            if (GameManager.Instance != null && !GameManager.Instance.CanMove)
                 return;
 
             int missing = targetFoodCount - activeFoods.Count;
@@ -58,9 +77,22 @@ namespace IO.Game.Gameplay
 
         public bool IsInsideArena(Vector3 position)
         {
-            Vector3 center = transform.position;
-            return Mathf.Abs(position.x - center.x) <= arenaSize.x * 0.5f
-                && Mathf.Abs(position.y - center.y) <= arenaSize.y * 0.5f;
+            if (arenaBounds != null)
+                return arenaBounds.Contains(position);
+
+            Vector2 offset = (Vector2)position - ArenaCenter;
+            return Mathf.Abs(offset.x) <= arenaSize.x * 0.5f
+                && Mathf.Abs(offset.y) <= arenaSize.y * 0.5f;
+        }
+
+        public Vector2 GetRandomPointInArena(float margin = 0.5f)
+        {
+            if (arenaBounds != null)
+                return arenaBounds.RandomPointInside(margin);
+
+            float halfWidth = Mathf.Max(0f, arenaSize.x * 0.5f - margin);
+            float halfHeight = Mathf.Max(0f, arenaSize.y * 0.5f - margin);
+            return ArenaCenter + new Vector2(Random.Range(-halfWidth, halfWidth), Random.Range(-halfHeight, halfHeight));
         }
 
         public FoodItem GetNearestFood(Vector3 position)
@@ -86,7 +118,7 @@ namespace IO.Game.Gameplay
 
         public void Release(FoodItem food)
         {
-            if (food == null || !activeFoods.Remove(food))
+            if (food == null || !activeFoods.Remove(food) || pool == null)
                 return;
 
             pool.Release(food);
@@ -98,13 +130,8 @@ namespace IO.Game.Gameplay
                 return;
 
             FoodItem food = pool.Get();
-            float halfWidth = Mathf.Max(0.5f, arenaSize.x * 0.5f);
-            float halfHeight = Mathf.Max(0.5f, arenaSize.y * 0.5f);
-            Vector3 center = transform.position;
-            food.transform.position = new Vector3(
-                center.x + Random.Range(-halfWidth, halfWidth),
-                center.y + Random.Range(-halfHeight, halfHeight),
-                0f);
+            Vector2 position = GetRandomPointInArena();
+            food.transform.position = new Vector3(position.x, position.y, 0f);
 
             int minScore = Mathf.Max(1, scoreRange.x);
             int maxScore = Mathf.Max(minScore, scoreRange.y);
