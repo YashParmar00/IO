@@ -30,6 +30,7 @@ namespace IO.Game.Core
 
             Instance = this;
             Time.timeScale = 1f;
+            Application.targetFrameRate = 60;
         }
 
         public void StartRun() => SetState(GameState.Playing);
