@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using IO.Game.Core;
 
 namespace IO.Game.UI
 {
@@ -13,10 +14,37 @@ namespace IO.Game.UI
 
         public event Action<int, int> ScoreChanged;
 
+        private GameManager gameManager;
+        private bool highScoreDirty;
+
         private void Awake()
         {
             HighScore = PlayerPrefs.GetInt(HighScoreKey, 0);
             ScoreChanged?.Invoke(Score, HighScore);
+        }
+
+        private void Start()
+        {
+            gameManager = GameManager.Instance;
+            if (gameManager != null)
+                gameManager.StateChanged += HandleGameStateChanged;
+        }
+
+        private void OnDisable()
+        {
+            if (gameManager != null)
+                gameManager.StateChanged -= HandleGameStateChanged;
+        }
+
+        private void OnApplicationPause(bool pauseStatus)
+        {
+            if (pauseStatus)
+                SaveHighScoreIfNeeded();
+        }
+
+        private void OnApplicationQuit()
+        {
+            SaveHighScoreIfNeeded();
         }
 
         public void AddScore(int amount = 1)
@@ -28,8 +56,7 @@ namespace IO.Game.UI
             if (Score > HighScore)
             {
                 HighScore = Score;
-                PlayerPrefs.SetInt(HighScoreKey, HighScore);
-                PlayerPrefs.Save();
+                highScoreDirty = true;
             }
 
             ScoreChanged?.Invoke(Score, HighScore);
@@ -39,6 +66,22 @@ namespace IO.Game.UI
         {
             Score = 0;
             ScoreChanged?.Invoke(Score, HighScore);
+        }
+
+        private void HandleGameStateChanged(GameState state)
+        {
+            if (state == GameState.GameOver)
+                SaveHighScoreIfNeeded();
+        }
+
+        private void SaveHighScoreIfNeeded()
+        {
+            if (!highScoreDirty)
+                return;
+
+            PlayerPrefs.SetInt(HighScoreKey, HighScore);
+            PlayerPrefs.Save();
+            highScoreDirty = false;
         }
     }
 }
