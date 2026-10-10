@@ -15,7 +15,7 @@ The generator intentionally overwrites its starter scene and the three starter p
 
 ## 3. What the generator creates
 
-- PlayerWorm: SpriteRenderer, kinematic Rigidbody2D, CircleCollider2D, PlayerController, and WormController.
+- PlayerWorm: SpriteRenderer, kinematic Rigidbody2D, trigger CircleCollider2D, PlayerController, and WormController. The Rigidbody2D allows trigger callbacks for head-to-head and head-to-body hits.
 - BodySegment: SpriteRenderer, trigger CircleCollider2D, and WormSegment.
 - Food: SpriteRenderer, trigger CircleCollider2D, and FoodItem.
 - GameRoot: GameManager and ScoreManager.
