@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using IO.Game.Core;
-using IO.Game.Player;
 using IO.Game.UI;
 
 namespace IO.Game.Gameplay
@@ -19,14 +18,12 @@ namespace IO.Game.Gameplay
 
         private readonly List<Transform> segments = new List<Transform>();
         private readonly List<Vector3> path = new List<Vector3>();
-        private PlayerController movement;
 
         public int SegmentCount => segments.Count;
         public bool IsPlayerControlled { get; private set; } = true;
 
         private void Awake()
         {
-            movement = GetComponent<PlayerController>();
             if (scoreManager == null)
                 scoreManager = FindFirstObjectByType<ScoreManager>();
 
@@ -51,7 +48,9 @@ namespace IO.Game.Gameplay
 
         public void EatFood(int points, int growth)
         {
-            scoreManager?.AddScore(points);
+            if (IsPlayerControlled)
+                scoreManager?.AddScore(points);
+
             Grow(growth);
         }
 
@@ -133,7 +132,6 @@ namespace IO.Game.Gameplay
 
                 float followDistance = (i + 1) * segmentSpacing;
                 Vector3 nextPosition = GetPositionAlongPath(followDistance);
-                Vector3 previousPosition = segment.position;
                 segment.position = nextPosition;
 
                 Vector2 forward = (Vector2)(GetPositionAlongPath(Mathf.Max(0f, followDistance - pathResolution)) - nextPosition);
