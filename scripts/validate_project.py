@@ -26,6 +26,8 @@ REQUIRED_FILES = [
     "Assets/Scripts/UI/ScoreHUD.cs",
     "Assets/Scripts/UI/GameFlowUI.cs",
     "docs/RESEARCH.md",
+    "docs/ARCHITECTURE.md",
+    "docs/TEST_PLAN.md",
     "docs/GAMEPLAY.md",
     "docs/UNITY_SETUP.md",
     "docs/ROADMAP.md",
@@ -60,7 +62,7 @@ def main() -> None:
         fail("Unity Editor bootstrap menu item is missing.")
 
     checked_scripts = 0
-    for path in (ROOT / "Assets/Scripts").rglob("*.cs"):
+    for path in (ROOT / "Assets").rglob("*.cs"):
         text = path.read_text(encoding="utf-8")
         if not text.strip():
             fail(f"Empty C# script: {path.relative_to(ROOT)}")
