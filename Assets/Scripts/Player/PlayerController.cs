@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 using IO.Game.Core;
 
 namespace IO.Game.Player
@@ -99,9 +100,21 @@ namespace IO.Game.Player
 
             Vector2? screenPosition = null;
             if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.isPressed)
-                screenPosition = Touchscreen.current.primaryTouch.position.ReadValue();
+            {
+                var touch = Touchscreen.current.primaryTouch;
+                int touchId = touch.touchId.ReadValue();
+                if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(touchId))
+                    return false;
+
+                screenPosition = touch.position.ReadValue();
+            }
             else if (Mouse.current != null)
+            {
+                if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                    return false;
+
                 screenPosition = Mouse.current.position.ReadValue();
+            }
 
             if (!screenPosition.HasValue || worldCamera == null)
                 return false;
