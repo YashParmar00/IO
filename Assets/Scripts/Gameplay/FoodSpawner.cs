@@ -18,6 +18,7 @@ namespace IO.Game.Gameplay
 
         public int ActiveFoodCount => activeFoods.Count;
         public Vector2 ArenaSize => arenaSize;
+        public Vector2 ArenaCenter => transform.position;
 
         private void Awake()
         {
@@ -89,9 +90,10 @@ namespace IO.Game.Gameplay
             FoodItem food = pool.Get();
             float halfWidth = Mathf.Max(0.5f, arenaSize.x * 0.5f);
             float halfHeight = Mathf.Max(0.5f, arenaSize.y * 0.5f);
+            Vector3 center = transform.position;
             food.transform.position = new Vector3(
-                Random.Range(-halfWidth, halfWidth),
-                Random.Range(-halfHeight, halfHeight),
+                center.x + Random.Range(-halfWidth, halfWidth),
+                center.y + Random.Range(-halfHeight, halfHeight),
                 0f);
 
             int minScore = Mathf.Max(1, scoreRange.x);
@@ -109,6 +111,7 @@ namespace IO.Game.Gameplay
 
         private static void OnTakeFromPool(FoodItem food) => food.gameObject.SetActive(true);
         private static void OnReturnToPool(FoodItem food) => food.gameObject.SetActive(false);
+
         private void OnDestroyPooledFood(FoodItem food)
         {
             if (food != null)
