@@ -19,7 +19,9 @@ namespace IO.Game.Player
         private Rigidbody2D body;
         private Vector2 heading = Vector2.up;
 
-        public float MoveSpeed => moveSpeed;
+        private float speedMultiplier = 1f;
+
+        public float MoveSpeed => moveSpeed * speedMultiplier;
         public Vector2 Heading => heading;
 
         private void Awake()
@@ -69,10 +71,15 @@ namespace IO.Game.Player
             if (!CanSimulate || body == null)
                 return;
 
-            Vector2 nextPosition = body.position + heading * moveSpeed * Time.fixedDeltaTime;
+            Vector2 nextPosition = body.position + heading * (moveSpeed * speedMultiplier) * Time.fixedDeltaTime;
             float rotationZ = Mathf.Atan2(heading.y, heading.x) * Mathf.Rad2Deg - 90f;
             body.MoveRotation(rotationZ);
             body.MovePosition(nextPosition);
+        }
+
+        public void SetSpeedMultiplier(float multiplier)
+        {
+            speedMultiplier = Mathf.Max(0.1f, multiplier);
         }
 
         public void SetSteeringTarget(Vector2 worldPosition)
