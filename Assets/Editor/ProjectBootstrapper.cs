@@ -7,6 +7,8 @@ using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using IO.Game.Core;
+using IO.Game.Config;
+using IO.Game.Input;
 using IO.Game.Gameplay;
 using IO.Game.Player;
 using IO.Game.UI;
@@ -26,6 +28,7 @@ namespace IO.Game.EditorTools
         private const string SegmentPrefabPath = "Assets/Prefabs/BodySegment.prefab";
         private const string FoodPrefabPath = "Assets/Prefabs/Food.prefab";
         private const string PlayerPrefabPath = "Assets/Prefabs/PlayerWorm.prefab";
+        private const string GameConfigPath = "Assets/Settings/GameConfig.asset";
 
         [MenuItem("Tools/IO/Create-Reset Demo Scene and Prefabs")]
         private static void CreateDemoSceneAndPrefabs()
@@ -44,6 +47,9 @@ namespace IO.Game.EditorTools
             EnsureFolder("Assets/Prefabs");
             EnsureFolder("Assets/Art");
             EnsureFolder("Assets/Art/Sprites");
+            EnsureFolder("Assets/Settings");
+
+            GameConfig gameConfig = LoadOrCreateGameConfig();
 
             Sprite headSprite = CreateCircleSprite(HeadSpritePath, new Color(0.38f, 0.95f, 0.34f));
             Sprite segmentSprite = CreateCircleSprite(SegmentSpritePath, new Color(0.20f, 0.72f, 0.30f));
@@ -51,21 +57,24 @@ namespace IO.Game.EditorTools
 
             GameObject segmentPrefab = CreateSegmentPrefab(segmentSprite);
             GameObject foodPrefab = CreateFoodPrefab(foodSprite);
-            GameObject playerPrefab = CreatePlayerPrefab(headSprite, segmentPrefab.transform);
+            GameObject playerPrefab = CreatePlayerPrefab(headSprite, segmentPrefab.transform, gameConfig);
 
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             GameObject root = new GameObject("GameRoot");
-            root.AddComponent<GameManager>();
+            GameManager gameManager = root.AddComponent<GameManager>();
+            SetObjectReference(gameManager, "gameConfig", gameConfig);
             ScoreManager scoreManager = root.AddComponent<ScoreManager>();
 
             GameObject spawnerObject = new GameObject("FoodSpawner");
+            ArenaBounds arenaBounds = spawnerObject.AddComponent<ArenaBounds>();
+            SetObjectReference(arenaBounds, "gameConfig", gameConfig);
+            SetVector2(arenaBounds, "size", gameConfig.ArenaSize);
+
             FoodSpawner spawner = spawnerObject.AddComponent<FoodSpawner>();
+            SetObjectReference(spawner, "gameConfig", gameConfig);
+            SetObjectReference(spawner, "arenaBounds", arenaBounds);
             SetObjectReference(spawner, "foodPrefab", foodPrefab.GetComponent<FoodItem>());
-            SetInt(spawner, "targetFoodCount", 90);
-            SetInt(spawner, "maxPoolSize", 160);
-            SetVector2(spawner, "arenaSize", new Vector2(32f, 20f));
-            SetVector2Int(spawner, "scoreRange", new Vector2Int(1, 4));
 
             GameObject cameraObject = new GameObject("Main Camera");
             cameraObject.tag = "MainCamera";
@@ -81,13 +90,14 @@ namespace IO.Game.EditorTools
             player.name = "PlayerWorm";
             player.transform.position = Vector3.zero;
             SetObjectReference(player.GetComponent<WormController>(), "scoreManager", scoreManager);
-            SetObjectReference(player.GetComponent<PlayerController>(), "worldCamera", camera);
+            SetObjectReference(player.GetComponent<WormController>(), "arenaBounds", arenaBounds);
+            SetObjectReference(player.GetComponent<WormInputReader>(), "worldCamera", camera);
             SetObjectReference(cameraFollow, "target", player.transform);
 
-            CreateBot(playerPrefab, "BotWorm_A", new Vector3(-7f, 4f, 0f), spawner, camera);
-            CreateBot(playerPrefab, "BotWorm_B", new Vector3(7f, -4f, 0f), spawner, camera);
+            CreateBot(playerPrefab, "BotWorm_A", new Vector3(-7f, 4f, 0f), spawner, arenaBounds, camera, gameConfig);
+            CreateBot(playerPrefab, "BotWorm_B", new Vector3(7f, -4f, 0f), spawner, arenaBounds, camera, gameConfig);
 
-            CreateHUD(root.GetComponent<GameManager>(), scoreManager);
+            CreateHUD(gameManager, scoreManager);
 
             System.Collections.Generic.List<EditorBuildSettingsScene> buildScenes =
                 new System.Collections.Generic.List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
@@ -148,7 +158,7 @@ namespace IO.Game.EditorTools
             return prefab;
         }
 
-        private static GameObject CreatePlayerPrefab(Sprite sprite, Transform segmentPrefab)
+        private static GameObject CreatePlayerPrefab(Sprite sprite, Transform segmentPrefab, GameConfig gameConfig)
         {
             AssetDatabase.DeleteAsset(PlayerPrefabPath);
             GameObject player = new GameObject("PlayerWorm");
@@ -165,32 +175,56 @@ namespace IO.Game.EditorTools
             collider.isTrigger = true;
             collider.radius = 0.44f;
 
-            player.AddComponent<PlayerController>();
+            WormInputReader inputReader = player.AddComponent<WormInputReader>();
+            PlayerController playerController = player.AddComponent<PlayerController>();
+            SetObjectReference(playerController, "gameConfig", gameConfig);
+            SetObjectReference(playerController, "inputReader", inputReader);
+
+            WormBody wormBody = player.AddComponent<WormBody>();
+            SetObjectReference(wormBody, "segmentPrefab", segmentPrefab);
+            SetObjectReference(wormBody, "gameConfig", gameConfig);
+            SetInt(wormBody, "startingSegments", 5);
+            SetInt(wormBody, "maximumSegments", gameConfig.MaximumSegments);
+
             WormController worm = player.AddComponent<WormController>();
-            SetObjectReference(worm, "segmentPrefab", segmentPrefab);
-            SetInt(worm, "startingSegments", 5);
-            SetFloat(worm, "segmentSpacing", 0.38f);
-            SetInt(worm, "maximumSegments", 500);
+            SetObjectReference(worm, "wormBody", wormBody);
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(player, PlayerPrefabPath);
             Object.DestroyImmediate(player);
             return prefab;
         }
 
-        private static void CreateBot(GameObject playerPrefab, string botName, Vector3 position, FoodSpawner spawner, Camera camera)
+        private static void CreateBot(
+            GameObject playerPrefab,
+            string botName,
+            Vector3 position,
+            FoodSpawner spawner,
+            ArenaBounds arenaBounds,
+            Camera camera,
+            GameConfig gameConfig)
         {
             GameObject bot = (GameObject)PrefabUtility.InstantiatePrefab(playerPrefab);
             bot.name = botName;
             bot.transform.position = position;
 
-            SetObjectReference(bot.GetComponent<PlayerController>(), "worldCamera", camera);
-            WormAIController ai = bot.AddComponent<WormAIController>();
-            SetObjectReference(ai, "movement", bot.GetComponent<PlayerController>());
-            SetObjectReference(ai, "worm", bot.GetComponent<WormController>());
-            SetObjectReference(ai, "foodSpawner", spawner);
-
+            PlayerController movement = bot.GetComponent<PlayerController>();
+            WormInputReader inputReader = bot.GetComponent<WormInputReader>();
+            WormBody body = bot.GetComponent<WormBody>();
             WormController worm = bot.GetComponent<WormController>();
-            SetInt(worm, "startingSegments", 3);
+
+            SetObjectReference(movement, "gameConfig", gameConfig);
+            SetObjectReference(movement, "inputReader", inputReader);
+            SetObjectReference(inputReader, "worldCamera", camera);
+            SetObjectReference(body, "gameConfig", gameConfig);
+            SetInt(body, "startingSegments", 3);
+            SetObjectReference(worm, "wormBody", body);
+            SetObjectReference(worm, "arenaBounds", arenaBounds);
+
+            WormAIController ai = bot.AddComponent<WormAIController>();
+            SetObjectReference(ai, "gameConfig", gameConfig);
+            SetObjectReference(ai, "movement", movement);
+            SetObjectReference(ai, "worm", worm);
+            SetObjectReference(ai, "foodSpawner", spawner);
         }
 
         private static void CreateHUD(GameManager gameManager, ScoreManager scoreManager)
@@ -352,6 +386,19 @@ namespace IO.Game.EditorTools
             }
 
             return AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+        }
+
+        private static GameConfig LoadOrCreateGameConfig()
+        {
+            GameConfig gameConfig = AssetDatabase.LoadAssetAtPath<GameConfig>(GameConfigPath);
+            if (gameConfig != null)
+                return gameConfig;
+
+            gameConfig = ScriptableObject.CreateInstance<GameConfig>();
+            AssetDatabase.CreateAsset(gameConfig, GameConfigPath);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            return gameConfig;
         }
 
         private static void EnsureFolder(string folderPath)
