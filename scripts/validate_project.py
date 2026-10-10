@@ -135,7 +135,7 @@ def main() -> None:
         if source.count("{") != source.count("}"):
             fail(f"Unbalanced C# braces: {path.relative_to(ROOT)}")
 
-        declared_types = re.findall(r"\\b(?:class|struct|enum)\\s+([A-Za-z_]\\w*)", source)
+        declared_types = re.findall(r"\b(?:class|struct|enum)\s+([A-Za-z_]\w*), source)
         if path.stem not in declared_types:
             fail(f"Main type name should match file name: {path.relative_to(ROOT)}")
 
