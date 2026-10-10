@@ -47,7 +47,7 @@ namespace IO.Game.EditorTools
 
             Sprite headSprite = CreateCircleSprite(HeadSpritePath, new Color(0.38f, 0.95f, 0.34f));
             Sprite segmentSprite = CreateCircleSprite(SegmentSpritePath, new Color(0.20f, 0.72f, 0.30f));
-            Sprite foodSprite = CreateCircleSprite(FoodSpritePath, new Color(1f, 0.72f, 0.18f));
+            Sprite foodSprite = CreateCircleSprite(FoodSpritePath, Color.white);
 
             GameObject segmentPrefab = CreateSegmentPrefab(segmentSprite);
             GameObject foodPrefab = CreateFoodPrefab(foodSprite);
