@@ -13,6 +13,9 @@ namespace IO.Game.Gameplay
         {
             if (owner == null)
                 owner = GetComponent<WormController>();
+
+            if (owner == null)
+                Debug.LogError("WormCollisionHandler requires a WormController reference.", this);
         }
 
         private void OnTriggerEnter2D(Collider2D other)
