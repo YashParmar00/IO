@@ -1,62 +1,108 @@
 # Runtime Architecture
 
-## Scene object graph
+This file describes the **current source architecture**. The Editor generator creates the scene and prefab objects that connect these scripts. Generated Unity assets are not checked in yet; see docs/UNITY_SETUP.md.
 
-The Editor generator in `Assets/Editor/ProjectBootstrapper.cs` creates this starter layout inside `Assets/Scenes/Main.unity`:
+## Object graph generated in Main.unity
 
-```text
+~~~text
 Main Camera
+  Camera
+  AudioListener
   CameraFollow -> PlayerWorm
+
 GameRoot
-  GameManager
+  GameManager -> GameConfig
   ScoreManager
+
 FoodSpawner
-  pooled Food instances
-PlayerWorm
-  Rigidbody2D (Kinematic)
-  CircleCollider2D (Trigger)
-  PlayerController
-  WormController
+  ArenaBounds -> GameConfig
+  FoodSpawner -> ArenaBounds, GameConfig, Food prefab
+
+PlayerWorm (prefab instance)
+  SpriteRenderer
+  kinematic Rigidbody2D
+  trigger CircleCollider2D
+  WormInputReader -> Main Camera
+  PlayerController -> GameConfig, WormInputReader
+  WormBody -> GameConfig, BodySegment prefab
+  WormController -> WormBody, ScoreManager, ArenaBounds
+  WormCollisionHandler -> WormController
+
 BotWorm_A / BotWorm_B
-  same movement + worm systems
-  WormAIController
+  same reusable worm components
+  WormAIController -> GameConfig, PlayerController, WormController, FoodSpawner
+
 GameCanvas
-  ScoreHUD
-  GameFlowUI
-  score labels, Pause button, state panel
+  Canvas + CanvasScaler + GraphicRaycaster
+  ScoreHUD -> ScoreManager
+  GameFlowUI -> GameManager, buttons, status panel
+
 EventSystem
+  EventSystem
   InputSystemUIInputModule
-```
+~~~
 
-Body segments are separate world-space objects (not children of the head). Food and segment instances are driven by the prefabs assigned to WormController and FoodSpawner.
+The tool also generates BodySegment and Food prefabs, placeholder circle sprites, the GameConfig asset, Main.unity and its Build Settings entry.
 
-## Responsibilities and flow
+## Component ownership
 
-1. **PlayerController** reads touch/pointer or keyboard input, smoothly turns the current heading, and moves the kinematic Rigidbody2D through the physics step.
-2. **WormController** records the head trail, samples it for segment positions, adds segments on growth, and ends the player's run on a collision or arena exit.
-3. **FoodSpawner** owns a capped Unity ObjectPool of FoodItem objects and fills the arena to its target count.
-4. **FoodItem** handles the collectible trigger, asks the worm to eat, then returns itself to the pool.
-5. **ScoreManager** increments score, maintains best score in memory, and persists it at game over or when the app is paused/quits. PlayerPrefs contains no secrets.
-6. **ScoreHUD** reflects score-change events; it does not own scoring rules.
-7. **WormAIController** uses the same movement/worm systems as the player but disables manual input and steers toward the nearest food.
-8. **GameManager** owns play/pause/game-over state and freezes scaled gameplay time while paused or over.
-9. **CameraFollow** tracks the player with smoothing.
+| Component | Owns | Must not own |
+|---|---|---|
+| GameConfig | Editable balance values shared via ScriptableObject | Runtime movement, score, or UI state |
+| GameManager | Run state, pause/game-over time freeze and state events | Per-worm logic or view layout |
+| WormInputReader | Touch/pointer/keyboard and externally supplied AI target | Moving the transform or scoring |
+| PlayerController | Head direction, turning and kinematic Rigidbody2D movement | Reading raw devices, tail history, food, UI |
+| WormBody | Initial trail, path history, body segment spawn/growth/following | Input, bot decisions, score and collision outcomes |
+| WormController | Player/bot role, scoring on pickup, arena exit and collision consequences | Raw input, trail math, trigger sensing |
+| WormCollisionHandler | Detecting head collider trigger contacts and forwarding to WormController | Deciding the whole run's outcome |
+| WormSegment | Owner reference attached to a tail segment | Segment motion or score |
+| ArenaBounds | World rectangle, containment checks, safe random points | Spawning food or deciding game over |
+| FoodSpawner | Capped pooled food items, food position and nearest-food queries | Player movement and score rules |
+| FoodItem | Pickup guard, score/growth values and food feedback | Pool inventory or UI |
+| WormAIController | Periodic bot target choice and wandering | Duplicate movement/body/collision logic |
+| ScoreManager | Current/high score, persistence and ScoreChanged event | Rendering text |
+| ScoreHUD | Rendering score labels from events | Authoritative score state |
+| GameFlowUI | Pause/resume/restart buttons and status panel | Freezing game state independently from GameManager |
+| CameraFollow | Camera follow target and smoothing | Player movement |
 
-## Physics and input assumptions
+## Important data flows
 
-- Player and bot heads have kinematic Rigidbody2D components with trigger CircleCollider2D.
-- Food and body segment prefabs have trigger colliders. Unity 2D trigger callbacks require at least one collider in a pair to be attached to a Rigidbody2D.
-- Player movement uses Unity Input System 1.20.1. Enable **Input System Package (New)** or **Both** in Player Settings if prompted.
-- Touches and mouse steering over UI are ignored so HUD controls do not redirect the worm.
+### Player steering
 
-## Performance principles
+WormInputReader reads a desired direction. PlayerController turns toward it in Update and moves the kinematic Rigidbody2D in FixedUpdate. WormBody records the resulting head trail and places its segments along the trail.
 
-- Food items are pooled instead of repeatedly destroyed and recreated.
-- Body following samples the stored path in one pass per frame, rather than scanning the entire path for every segment.
-- Food count, pool size, and maximum worm body length are bounded.
-- Bot nearest-food selection currently scans active food on each bot Update. If bot/food counts grow, move this query to a short decision interval or spatial index and profile before changing architecture.
-- Body segments are instantiated as growth occurs and are not yet pooled; that should be reconsidered only if profiling shows meaningful cost.
+Bots call PlayerController.SetSteeringTarget instead of emulating a virtual touch input. The same movement code is reused for the player and bots.
 
-## Deliberate exclusions from the MVP
+### Food and growth
 
-This is a local prototype, not online multiplayer. Bots are not remote players. There is no account system, cloud save, leaderboard backend, ads, purchases, or analytics. Each requires separate technical and privacy decisions after the offline loop is tested.
+FoodSpawner owns a Unity ObjectPool of FoodItem components. On a head-trigger pickup, FoodItem uses a consumed guard, then calls WormController.EatFood. WormController awards points only for the player and tells WormBody to grow. FoodItem returns to its owner pool; FoodSpawner refills toward the target count.
+
+### Collision and game state
+
+WormCollisionHandler receives head trigger callbacks and asks WormController to handle the other head or WormSegment. Player collisions and player arena exits end the run via GameManager; bot collisions/exits remove the bot and hide its segments. GameManager emits StateChanged, allowing the HUD to show pause/game-over state.
+
+### Score and persistence
+
+ScoreManager owns score totals and emits ScoreChanged. ScoreHUD renders those values. The best score is held in memory during a run and saved with PlayerPrefs at game-over, app pause, quit, or component disable. PlayerPrefs is not encrypted and must never contain secrets or sensitive data.
+
+## Physics assumptions
+
+- Heads use kinematic Rigidbody2D plus trigger CircleCollider2D; head motion goes through MovePosition/MoveRotation.
+- Food and tail segments use trigger CircleCollider2D. Each trigger interaction has a Rigidbody2D on the head side.
+- The player must use the new Input System or Both under Player Settings.
+- The world arena and food placement both use ArenaBounds to avoid divergent hard-coded playfield sizes.
+
+## Performance decisions
+
+- Food is pooled, and the active count is capped.
+- Bot target selection runs at a configurable interval rather than scanning food each rendered frame.
+- Body trail history is trimmed to the length needed for the current body; segment position updates walk the path once per frame.
+- Worm length, food count and pool capacity are capped.
+- Body segments are still instantiated during growth rather than pooled. Only add body pooling if a profiler run indicates a real problem.
+- Profile on a real low/mid-range Android device before increasing bot and food counts.
+
+## Current limitations
+
+- Main.unity, prefabs and GameConfig.asset are generated by the Editor tool; the Unity Editor has not been run in this environment.
+- The game has only basic nearest-food AI and placeholder visuals. There is no complete polished start screen, boost system, audio, online play, backend, monetization or cloud save.
+- GitHub Actions validates source layout/configuration only. It does not compile C#, open the scene, play the game, or build Android output.
