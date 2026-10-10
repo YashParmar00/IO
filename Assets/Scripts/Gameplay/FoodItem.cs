@@ -21,10 +21,12 @@ namespace IO.Game.Gameplay
                 spriteRenderer = GetComponent<SpriteRenderer>();
         }
 
-        public void Configure(FoodSpawner spawner, int scoreValue)
+        public void Configure(FoodSpawner spawner, int scoreValue, int configuredGrowthAmount = 0)
         {
             owner = spawner;
             ScoreValue = Mathf.Max(1, scoreValue);
+            if (configuredGrowthAmount > 0)
+                growthAmount = configuredGrowthAmount;
             consumed = false;
 
             float value01 = Mathf.Clamp01((ScoreValue - 1) / 3f);
