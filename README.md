@@ -1,45 +1,47 @@
 # IO — Mobile Worm Arena
 
-An original Unity 2D mobile arcade game prototype inspired by the broad worm-arena genre. The goal is to build a smooth, offline-first single-player core before adding progression, monetization, or online multiplayer. This project does not include Worms Zone artwork, code, or branding.
+An original Unity 2D mobile arcade prototype inspired by the broader worm-arena genre. Build a responsive offline single-player loop first; add online systems only when the core game is stable. This repository does not include Worms Zone artwork, code, or branding.
 
-## Recommended toolchain
+## Toolchain
 
-- Unity 6.3 LTS (Editor version family 6000.3), installed through Unity Hub.
-- Input System package 1.20.1 for touch, pointer, and keyboard steering.
-- Android Build Support (Android SDK & NDK tools and OpenJDK) for Android builds.
-- Git with Git LFS only if the team later adds large binary art/audio files.
+- **Unity 6.3 LTS, 6000.3.25f1** (recommended baseline; install via Unity Hub).
+- **Input System 1.20.1** for touch, pointer, and keyboard steering.
+- Android Build Support (Android SDK & NDK Tools and OpenJDK) for Android builds.
 
-Use the latest available 6000.3 LTS patch in Unity Hub. Open this repository as a Unity project after cloning; the first Editor import creates generated project files. iOS builds additionally require macOS and Xcode.
+Unity released 6000.3.25f1 on 24 September 2026. See [official release notes](https://unity.com/releases/editor/whats-new/6000.3.25f1). iOS builds additionally require macOS and Xcode.
 
-## Implemented starter systems
+## Included
 
-- Game state manager with play, pause, resume, and game-over states.
-- Pointer/touch/keyboard steering for a continuously moving worm head.
-- Food pooling, food scoring values, and nearest-food lookup for bot steering.
-- Worm body path-following and growth.
-- Simple AI steering toward nearby food.
-- Local best-score persistence using PlayerPrefs.
+- Play/pause/resume/game-over state manager.
+- Touch/pointer/keyboard steering and Rigidbody2D-based kinematic movement.
+- Worm head path tracking, segment following, and growth.
+- Capped pooled food, score values, and nearest-food query.
+- Simple local AI worms.
+- Local best score persistence and score HUD.
+- Pause/game-over/restart UI.
+- One-click Editor generator for placeholder sprites, prefabs, a demo scene, HUD, bots, and Build Settings.
 
-These scripts are starter systems, not a finished game: the first scene, sprites, prefabs, serialized references, HUD wiring, and platform build settings still need to be authored and verified in Unity Editor.
+## Create the demo
 
-## Open it
+1. Install Unity 6.3 LTS 6000.3.25f1 through Unity Hub, then open this repository folder.
+2. Let Package Manager resolve dependencies. In Project Settings > Player, set Active Input Handling to **Input System Package (New)** or **Both** if Unity asks.
+3. In the Editor menu, choose **Tools > IO > Create-Reset Demo Scene and Prefabs** and confirm. This generates original placeholder circle sprites, BodySegment/Food/PlayerWorm prefabs, Main.unity, HUD, two bot worms, and adds the scene to Build Settings.
+4. Open Assets/Scenes/Main.unity and press Play. Use mouse/pointer or WASD/arrow keys to steer. Try the pause and restart buttons.
+5. Test touch controls on a physical Android device and check the Console before expanding the project.
 
-1. Clone this repository and open the project folder in Unity Hub.
-2. Install Unity 6.3 LTS (6000.3 family) and Android Build Support if targeting Android.
-3. Let Unity resolve Packages and generate Library/ProjectSettings metadata.
-4. Follow docs/UNITY_SETUP.md to assemble the first scene and required prefabs.
-5. Test in the Editor with mouse or WASD/arrows, then on a physical Android device.
+The generator has been committed but cannot be run by the GitHub connection itself. Unity still needs to import and execute it locally. The scene/prefabs/build are not claimed as tested until the Editor and device checks pass.
 
-## Repository layout
+## Layout
 
-- Assets/Scripts/Core — run state and game-wide coordination
-- Assets/Scripts/Player — player steering
-- Assets/Scripts/Gameplay — food, spawning, worm growth, bot steering
-- Assets/Scripts/UI — score persistence and HUD
-- Assets/Scenes, Prefabs, Art, Audio, Settings — Unity-created content
-- Packages/manifest.json — package dependencies
-- docs — design scope, setup checklist, and implementation roadmap
+- Assets/Scripts/Core — state and camera
+- Assets/Scripts/Player — player input and movement
+- Assets/Scripts/Gameplay — food, pooling, worm growth, AI, segments
+- Assets/Scripts/UI — score, HUD, game-flow controls
+- Assets/Editor — one-click starter content generator
+- Assets/Scenes, Prefabs, Art — generated starter scene, prefabs, placeholder sprites
+- Packages/manifest.json — dependencies
+- docs — research, setup, gameplay scope, and roadmap
 
-## Quality rule
+## Quality rules
 
-Do not add network multiplayer, login, ads, analytics, or cloud save until the offline loop is fun and stable. Never store secrets or sensitive data in PlayerPrefs. See docs/RESEARCH.md for primary Unity documentation and key decisions.
+Do not add multiplayer, login, ads, analytics, or cloud save until offline play is fun and stable. Never store secrets or sensitive data in PlayerPrefs. See docs/RESEARCH.md for primary Unity references and technical decisions.
