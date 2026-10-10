@@ -23,6 +23,8 @@ namespace IO.Game.Core
         public bool CanMove => State == GameState.Playing;
         public event Action<GameState> StateChanged;
 
+        private bool pausedByApplication;
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -57,6 +59,27 @@ namespace IO.Game.Core
         }
 
         public void ResetRun() => SetState(GameState.Playing);
+
+        private void OnApplicationPause(bool isPaused)
+        {
+            if (isPaused)
+            {
+                if (State == GameState.Playing)
+                {
+                    pausedByApplication = true;
+                    Pause();
+                }
+
+                return;
+            }
+
+            if (pausedByApplication)
+            {
+                pausedByApplication = false;
+                if (State == GameState.Paused)
+                    Resume();
+            }
+        }
 
         private void SetState(GameState nextState)
         {
