@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fast repository sanity checks. This does not replace a Unity Editor compile or device test."""
+"""Static repository sanity checks; does not replace a Unity compile or device test."""
 from __future__ import annotations
 
 import json
@@ -8,37 +8,55 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_EDITOR = "6000.3.26f1"
+EXPECTED_CHANGESET = "de8167e7440c"
 
 REQUIRED_FILES = [
     "README.md",
+    ".gitignore",
+    ".github/workflows/project-sanity.yml",
     "Packages/manifest.json",
     "ProjectSettings/ProjectVersion.txt",
     "Assets/Editor/ProjectBootstrapper.cs",
+    "Assets/Scripts/README.md",
+    "Assets/Settings/README.md",
+    "Assets/Scripts/Config/GameConfig.cs",
     "Assets/Scripts/Core/GameManager.cs",
     "Assets/Scripts/Core/CameraFollow.cs",
+    "Assets/Scripts/Input/WormInputReader.cs",
     "Assets/Scripts/Player/PlayerController.cs",
+    "Assets/Scripts/Gameplay/ArenaBounds.cs",
     "Assets/Scripts/Gameplay/FoodSpawner.cs",
     "Assets/Scripts/Gameplay/FoodItem.cs",
     "Assets/Scripts/Gameplay/WormController.cs",
+    "Assets/Scripts/Gameplay/WormBody.cs",
+    "Assets/Scripts/Gameplay/WormCollisionHandler.cs",
     "Assets/Scripts/Gameplay/WormSegment.cs",
     "Assets/Scripts/Gameplay/WormAIController.cs",
     "Assets/Scripts/UI/ScoreManager.cs",
     "Assets/Scripts/UI/ScoreHUD.cs",
     "Assets/Scripts/UI/GameFlowUI.cs",
-    "docs/RESEARCH.md",
     "docs/ARCHITECTURE.md",
-    "docs/TEST_PLAN.md",
     "docs/GAMEPLAY.md",
-    "docs/UNITY_SETUP.md",
+    "docs/RESEARCH.md",
     "docs/ROADMAP.md",
+    "docs/TEST_PLAN.md",
+    "docs/UNITY_SETUP.md",
+    "scripts/validate_project.py",
 ]
 
 def fail(message: str) -> None:
     print(f"ERROR: {message}", file=sys.stderr)
     raise SystemExit(1)
 
+def require_tokens(path: str, tokens: list[str]) -> None:
+    source_path = ROOT / path
+    content = source_path.read_text(encoding="utf-8")
+    missing = [token for token in tokens if token not in content]
+    if missing:
+        fail(f"{path} is missing expected architectural token(s): {', '.join(missing)}")
+
 def main() -> None:
-    missing = [p for p in REQUIRED_FILES if not (ROOT / p).is_file()]
+    missing = [path for path in REQUIRED_FILES if not (ROOT / path).is_file()]
     if missing:
         fail("Missing required files: " + ", ".join(missing))
 
@@ -49,29 +67,76 @@ def main() -> None:
 
     dependencies = manifest.get("dependencies", {})
     if dependencies.get("com.unity.inputsystem") != "1.20.1":
-        fail("Input System should remain pinned to the validated Unity 6000.3 version 1.20.1.")
+        fail("Input System should be pinned to the released Unity 6000.3 version 1.20.1.")
+    if "com.unity.ugui" not in dependencies:
+        fail("uGUI package dependency is required by ScoreHUD and GameFlowUI.")
 
     version_text = (ROOT / "ProjectSettings/ProjectVersion.txt").read_text(encoding="utf-8")
     if f"m_EditorVersion: {EXPECTED_EDITOR}" not in version_text:
         fail(f"ProjectVersion.txt must pin Editor {EXPECTED_EDITOR}.")
-    if "de8167e7440c" not in version_text:
+    if EXPECTED_CHANGESET not in version_text:
         fail("ProjectVersion.txt changeset does not match the pinned Editor patch.")
 
+    require_tokens("Assets/Scripts/Player/PlayerController.cs", [
+        "WormInputReader", "body.MovePosition", "body.MoveRotation",
+        "SetSteeringTarget", "SetPlayerInputEnabled",
+    ])
+    require_tokens("Assets/Scripts/Input/WormInputReader.cs", [
+        "TryGetDesiredDirection", "Touchscreen.current", "Keyboard.current",
+        "IsPointerOverGameObject",
+    ])
+    require_tokens("Assets/Scripts/Gameplay/WormBody.cs", [
+        "SeedInitialPath", "UpdateBodySegments", "public void Grow", "HideSegments",
+    ])
+    require_tokens("Assets/Scripts/Gameplay/WormController.cs", [
+        "WormBody", "ArenaBounds", "EatFood", "HandleTriggerContact", "EndRun",
+    ])
+    require_tokens("Assets/Scripts/Gameplay/WormCollisionHandler.cs", [
+        "OnTriggerEnter2D", "owner?.HandleTriggerContact(other)",
+    ])
+    require_tokens("Assets/Scripts/Gameplay/FoodSpawner.cs", [
+        "ObjectPool<FoodItem>", "ArenaBounds", "GetNearestFood", "GetRandomPointInArena",
+    ])
+    require_tokens("Assets/Scripts/Gameplay/FoodItem.cs", [
+        "worm.EatFood", "owner.Release(this)", "consumed",
+    ])
+    require_tokens("Assets/Editor/ProjectBootstrapper.cs", [
+        'MenuItem("Tools/IO/Create-Reset Demo Scene and Prefabs")',
+        "LoadOrCreateGameConfig()", "AddComponent<WormInputReader>()",
+        "AddComponent<PlayerController>()", "AddComponent<WormBody>()",
+        "AddComponent<WormController>()", "AddComponent<WormCollisionHandler>()",
+        "AddComponent<ArenaBounds>()", "AddComponent<FoodSpawner>()",
+        'SetObjectReference(player.GetComponent<WormInputReader>(), "worldCamera", camera)',
+    ])
+
     generator = (ROOT / "Assets/Editor/ProjectBootstrapper.cs").read_text(encoding="utf-8")
-    if 'MenuItem("Tools/IO/Create-Reset Demo Scene and Prefabs")' not in generator:
-        fail("Unity Editor bootstrap menu item is missing.")
+    if 'SetObjectReference(player.GetComponent<PlayerController>(), "worldCamera", camera)' in generator:
+        fail("Stale generator reference: worldCamera belongs on WormInputReader, not PlayerController.")
+
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    documented_paths = [
+        "Assets/Scripts/Config/GameConfig.cs",
+        "Assets/Scripts/Input/WormInputReader.cs",
+        "Assets/Scripts/Player/PlayerController.cs",
+        "Assets/Scripts/Gameplay/WormBody.cs",
+        "Assets/Scripts/Gameplay/WormCollisionHandler.cs",
+        "Assets/Scripts/UI/ScoreManager.cs",
+    ]
+    missing_docs = [path for path in documented_paths if path not in readme]
+    if missing_docs:
+        fail("README does not document these source files: " + ", ".join(missing_docs))
 
     checked_scripts = 0
     for path in (ROOT / "Assets").rglob("*.cs"):
-        text = path.read_text(encoding="utf-8")
-        if not text.strip():
+        source = path.read_text(encoding="utf-8")
+        if not source.strip():
             fail(f"Empty C# script: {path.relative_to(ROOT)}")
-        if text.count("{") != text.count("}"):
+        if source.count("{") != source.count("}"):
             fail(f"Unbalanced C# braces: {path.relative_to(ROOT)}")
         checked_scripts += 1
 
     print(f"Repository sanity checks passed. {checked_scripts} C# scripts inspected.")
-    print("Note: Unity compilation, Package Manager import, Play mode, and Android device tests still need Unity.")
+    print("Note: this checks structure and cross-file wiring only; Unity compile, import, Play Mode and Android tests still need Unity.")
 
 if __name__ == "__main__":
     main()
