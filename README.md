@@ -28,6 +28,7 @@ References: [Unity Editor 6000.3.26f1 release notes](https://unity.com/releases/
 ## 3. Folder tree
 
 ~~~text
+.gitignore                       # Excludes Unity caches, local IDE files and build output
 .github/
   workflows/
     project-sanity.yml            # Lightweight repository checks on push/PR
@@ -46,8 +47,10 @@ Assets/
   Scenes/
     Main.unity                    # Generated locally by the Editor menu
   Settings/
+    README.md                     # Explains the source config class and generated asset
     GameConfig.asset              # Generated tuning asset; editable in Inspector
   Scripts/
+    README.md                    # Rules for placing and separating runtime scripts
     Config/GameConfig.cs
     Core/GameManager.cs
     Core/CameraFollow.cs
@@ -128,7 +131,8 @@ Directories containing only a .gitkeep marker are intentional placeholders: Git 
 | Assets/Editor/ProjectBootstrapper.cs | Editor-only generator for placeholder art, prefabs and Main scene. | Editor asset creation, component attachment, SerializedObject reference assignment, HUD setup and Build Settings registration. Do not put runtime gameplay logic here. |
 | Packages/manifest.json | Declares Unity package dependencies. | Change package versions deliberately, checking that the version is released for the pinned Editor. Core packages such as 2D Sprite and uGUI should match the selected Unity Editor. |
 | ProjectSettings/ProjectVersion.txt | Pins the exact Editor baseline. | Update only when the team deliberately upgrades Unity and retests the project. Other Unity settings are generated/managed by the Editor after opening the project. |
-| scripts/validate_project.py | Checks repository files, package JSON, version pin, generator entry point and basic C# structure. | Add static repository checks here. It is not a substitute for C# compilation or Play Mode testing. |
+| scripts/validate_project.py | Checks repository files, package JSON, version pin, generator wiring, README coverage and basic C# structure. | Add static repository checks here. It is not a substitute for C# compilation or Play Mode testing. |
+| .gitignore | Keeps Unity caches, generated IDE files, local builds and logs out of source control. | Add only local/generated paths here; do not ignore source assets that should be shared with the team. |
 | .github/workflows/project-sanity.yml | Runs the Python sanity script on pushes and pull requests. | Fast CI checks that need no Unity installation. Unity compile/build tests are not configured yet. |
 
 ### Documentation files
@@ -142,6 +146,8 @@ Directories containing only a .gitkeep marker are intentional placeholders: Git 
 | docs/TEST_PLAN.md | Step-by-step manual tests for import, movement, food, collisions, pause/restart, save persistence and Android behavior. |
 | docs/UNITY_SETUP.md | Instructions for opening the project, running the generator, reviewing generated components and validating the scene. |
 | Assets/README.md, Assets/Scenes/README.md, Assets/Prefabs/README.md | Short purpose notes for the asset folders, including why Unity should create valid scene/prefab files. |
+| Assets/Scripts/README.md | Describes the script folder boundaries and one-component-per-file rule. |
+| Assets/Settings/README.md | Explains that GameConfig.cs defines the tuning asset and Unity should generate GameConfig.asset. |
 | ProjectSettings/README.md | Explains that the Editor should generate the full settings folder for the pinned Unity version. |
 
 ## 5. Which components belong on which GameObject?
