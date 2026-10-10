@@ -22,6 +22,7 @@ namespace IO.Game.Gameplay
         private readonly HashSet<FoodItem> activeFoods = new HashSet<FoodItem>();
 
         public int ActiveFoodCount => activeFoods.Count;
+        public int GrowthPerFood => gameConfig != null ? gameConfig.GrowthPerFood : 1;
         public Vector2 ArenaSize => arenaBounds != null ? arenaBounds.Size : arenaSize;
         public Vector2 ArenaCenter => arenaBounds != null ? arenaBounds.Center : (Vector2)transform.position;
 
@@ -135,7 +136,7 @@ namespace IO.Game.Gameplay
 
             int minScore = Mathf.Max(1, scoreRange.x);
             int maxScore = Mathf.Max(minScore, scoreRange.y);
-            food.Configure(this, Random.Range(minScore, maxScore + 1));
+            food.Configure(this, Random.Range(minScore, maxScore + 1), GrowthPerFood);
             activeFoods.Add(food);
         }
 
