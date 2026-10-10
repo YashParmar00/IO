@@ -44,6 +44,9 @@ namespace IO.Game.Gameplay
             if (worm != null)
                 worm.SetPlayerControlled(false);
 
+            if (foodSpawner == null)
+                Debug.LogWarning("WormAIController requires a FoodSpawner reference to choose targets.", this);
+
             ChooseWanderTarget();
             nextDecisionTime = 0f;
         }
