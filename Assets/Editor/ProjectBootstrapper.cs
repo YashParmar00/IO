@@ -188,6 +188,8 @@ namespace IO.Game.EditorTools
 
             WormController worm = player.AddComponent<WormController>();
             SetObjectReference(worm, "wormBody", wormBody);
+            WormCollisionHandler collisionHandler = player.AddComponent<WormCollisionHandler>();
+            SetObjectReference(collisionHandler, "owner", worm);
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(player, PlayerPrefabPath);
             Object.DestroyImmediate(player);
