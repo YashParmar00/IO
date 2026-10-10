@@ -35,6 +35,8 @@ namespace IO.Game.Gameplay
             {
                 decisionInterval = gameConfig.BotDecisionInterval;
                 wanderRadius = gameConfig.BotWanderRadius;
+                if (movement != null)
+                    movement.SetSpeedMultiplier(gameConfig.BotSpeedMultiplier);
             }
 
             if (movement != null)
