@@ -56,6 +56,9 @@ namespace IO.Game.Gameplay
 
         private void Update()
         {
+            if (GameManager.Instance != null && !GameManager.Instance.CanMove)
+                return;
+
             if (arenaSpawner != null && !arenaSpawner.IsInsideArena(transform.position))
             {
                 HandleArenaExit();
