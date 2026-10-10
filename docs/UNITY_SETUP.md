@@ -51,7 +51,7 @@ Follow docs/TEST_PLAN.md. At minimum:
 
 - Build and run on at least one physical phone. Confirm touch steering and ensure tapping UI does not steer the worm.
 - Check portrait sizing on different screen ratios; make sure score labels and buttons respect safe areas.
-- Check app pause/resume, frame pacing, memory, heat and battery during longer runs.
+- Check app pause/resume, frame pacing, memory, heat and battery during longer runs. A backgrounded game should pause and resume automatically only when it was playing before backgrounding.
 - Use the Unity Profiler before increasing body length, food count, effects or bot count.
 - Configure app identifier, icons, signing and release build settings before publishing.
 
