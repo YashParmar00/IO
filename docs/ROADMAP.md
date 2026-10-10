@@ -2,23 +2,25 @@
 
 ## Phase 1 — First playable
 - [x] Repository layout and starter documentation
+- [x] Unity 6.3 LTS Editor version pinned
 - [x] Game run-state manager
 - [x] Pointer/touch/keyboard steering
-- [x] Worm path follower and growth API
-- [x] Pooled food and nearest-food query
-- [x] Local score and best-score persistence
+- [x] Kinematic head movement and body path follower/growth
+- [x] Pooled food, score values, and nearest-food query
+- [x] Local score/high-score persistence
 - [x] Simple local AI steering
-- [ ] Create/verify Main scene and prefabs in Unity 6.3 Editor
-- [ ] Wire HUD and test the full food-to-growth loop
-- [ ] Finish and verify collision, game-over, and restart behavior
+- [x] One-click scene/prefab/HUD generator added
+- [ ] Run the generator in Unity Editor and inspect its output
+- [ ] Verify the full food-to-growth loop and tune movement
+- [ ] Verify collision, arena-exit, game-over, and restart behavior
 - [ ] Test on Android devices and profile
 
 ## Phase 2 — Game feel
 - [ ] Add boost/power-up data and cooldown balancing
-- [ ] Add original art, animation, audio, haptics, and feedback
+- [ ] Replace placeholder circles with original art, animation, audio, haptics, and feedback
 - [ ] Improve bot navigation and safe spawn logic
-- [ ] Add settings, pause/game-over panels, and accessibility
-- [ ] Add object-spawn telemetry/debug gizmos for development
+- [ ] Add better menus, settings, and accessibility
+- [ ] Add debug gizmos and development telemetry for spawn bounds/performance
 
 ## Phase 3 — Release readiness
 - [ ] Configure app identifier, icons, orientation, signing, and Android build
@@ -29,4 +31,4 @@
 
 ## Definition of done for the first playable
 
-A fresh clone opens cleanly in the chosen Unity Editor, plays without Console errors, has stable head/body motion, lets the player eat food and grow, updates score/high score, ends the run reliably after a valid collision, restarts correctly, and holds acceptable performance on a real Android phone.
+A fresh clone opens cleanly in the pinned Unity Editor, plays without Console errors, has stable head/body motion, lets the player eat food and grow, updates score/high score, ends the run reliably after a valid collision or arena exit, restarts correctly, and holds acceptable performance on a real Android phone.
