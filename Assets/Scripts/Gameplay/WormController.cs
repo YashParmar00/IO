@@ -167,19 +167,53 @@ namespace IO.Game.Gameplay
 
         private void UpdateBodySegments()
         {
-            for (int i = 0; i < segments.Count; i++)
+            if (segments.Count == 0 || path.Count < 2)
+                return;
+
+            int segmentIndex = 0;
+            float distanceBeforeEdge = 0f;
+
+            // Walk the saved head path once. This is O(path + segments), instead of
+            // rescanning the path separately for every segment on every frame.
+            for (int pathIndex = 1; pathIndex < path.Count && segmentIndex < segments.Count; pathIndex++)
             {
-                Transform segment = segments[i];
-                if (segment == null)
+                Vector3 newer = path[pathIndex - 1];
+                Vector3 older = path[pathIndex];
+                float span = Vector3.Distance(newer, older);
+                if (span <= 0.0001f)
                     continue;
 
-                float followDistance = (i + 1) * segmentSpacing;
-                Vector3 nextPosition = GetPositionAlongPath(followDistance);
-                segment.position = nextPosition;
+                float distanceAfterEdge = distanceBeforeEdge + span;
+                Vector3 tailDirection = older - newer;
 
-                Vector2 forward = (Vector2)(GetPositionAlongPath(Mathf.Max(0f, followDistance - pathResolution)) - nextPosition);
-                if (forward.sqrMagnitude > 0.0001f)
-                    segment.up = forward.normalized;
+                while (segmentIndex < segments.Count)
+                {
+                    float targetDistance = (segmentIndex + 1) * segmentSpacing;
+                    if (targetDistance > distanceAfterEdge)
+                        break;
+
+                    Transform segment = segments[segmentIndex];
+                    if (segment != null)
+                    {
+                        float t = Mathf.Clamp01((targetDistance - distanceBeforeEdge) / span);
+                        segment.position = Vector3.Lerp(newer, older, t);
+                        if (tailDirection.sqrMagnitude > 0.0001f)
+                            segment.up = tailDirection.normalized;
+                    }
+
+                    segmentIndex++;
+                }
+
+                distanceBeforeEdge = distanceAfterEdge;
+            }
+
+            // Normally the seed path is long enough for each segment. Keep the
+            // fallback deterministic if the path was cleared or shortened unexpectedly.
+            Vector3 oldestPoint = path[path.Count - 1];
+            for (; segmentIndex < segments.Count; segmentIndex++)
+            {
+                if (segments[segmentIndex] != null)
+                    segments[segmentIndex].position = oldestPoint;
             }
         }
 
