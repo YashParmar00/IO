@@ -1,13 +1,24 @@
+using System;
 using UnityEngine;
 
 namespace IO.Game.Core
 {
-    /// <summary>Coordinates the overall game state. Add to a GameObject in the main scene.</summary>
-    public class GameManager : MonoBehaviour
+    public enum GameState
+    {
+        Ready,
+        Playing,
+        Paused,
+        GameOver
+    }
+
+    /// <summary>Owns the current run state. Place one instance in the game scene.</summary>
+    public sealed class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
 
-        public bool IsGameOver { get; private set; }
+        public GameState State { get; private set; } = GameState.Playing;
+        public bool CanMove => State == GameState.Playing;
+        public event Action<GameState> StateChanged;
 
         private void Awake()
         {
@@ -18,18 +29,39 @@ namespace IO.Game.Core
             }
 
             Instance = this;
-        }
-
-        public void EndGame()
-        {
-            IsGameOver = true;
-            Time.timeScale = 0f;
-        }
-
-        public void RestartTime()
-        {
             Time.timeScale = 1f;
-            IsGameOver = false;
+        }
+
+        public void StartRun() => SetState(GameState.Playing);
+
+        public void Pause()
+        {
+            if (State == GameState.Playing)
+                SetState(GameState.Paused);
+        }
+
+        public void Resume()
+        {
+            if (State == GameState.Paused)
+                SetState(GameState.Playing);
+        }
+
+        public void EndRun()
+        {
+            if (State != GameState.GameOver)
+                SetState(GameState.GameOver);
+        }
+
+        public void ResetRun() => SetState(GameState.Ready);
+
+        private void SetState(GameState nextState)
+        {
+            if (State == nextState)
+                return;
+
+            State = nextState;
+            Time.timeScale = nextState == GameState.Paused || nextState == GameState.GameOver ? 0f : 1f;
+            StateChanged?.Invoke(State);
         }
 
         private void OnDestroy()
@@ -37,6 +69,7 @@ namespace IO.Game.Core
             if (Instance == this)
             {
                 Instance = null;
+                Time.timeScale = 1f;
             }
         }
     }
