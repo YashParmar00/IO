@@ -79,7 +79,7 @@ FoodSpawner owns a Unity ObjectPool of FoodItem components. On a head-trigger pi
 
 ### Collision and game state
 
-WormCollisionHandler receives head trigger callbacks and asks WormController to handle the other head or WormSegment. Player collisions and player arena exits end the run via GameManager; bot collisions/exits remove the bot and hide its segments. GameManager emits StateChanged, allowing the HUD to show pause/game-over state.
+WormCollisionHandler receives head trigger callbacks and asks WormController to handle the other head or WormSegment. Player collisions and player arena exits end the run via GameManager; bot collisions/exits remove the bot and hide its segments. GameManager emits StateChanged, allowing the HUD to show pause/game-over state. If the app backgrounds while it was playing, GameManager pauses the run and resumes it on foreground return; a manual pause is not auto-resumed.
 
 ### Score and persistence
 
