@@ -21,7 +21,7 @@ Build an original, portrait-first, offline worm-arena arcade game. Use the commo
 4. **Separate responsibilities.** GameManager owns run state; PlayerController handles input and heading; WormController owns tail path/growth and arena exits; FoodSpawner owns food lifecycle; ScoreManager owns score persistence; HUD scripts only display state.
 5. **Local best score only for now.** PlayerPrefs is appropriate for simple, non-sensitive local preferences and an offline high score; it is not encrypted and must never store secrets. Cloud save can be evaluated later if cross-device progression is needed.
 6. **Generate scene and prefabs inside Unity Editor.** The committed editor utility creates original placeholder sprites, PlayerWorm/BodySegment/Food prefabs, Main.unity, a camera, bots, score HUD, pause/game-over/restart UI, and Build Settings entry. Generated Unity assets are only created when the user runs the menu item.
-7. **Measure on phones.** Start with capped entities and pooling, then profile on low/mid-range Android hardware before adopting heavier effects or adding lots of bodies.
+7. **Android toolchain:** Unity's 6000.3 dependency guide lists Android SDK Build Tools 36.0.0, command-line tools 16, and platform-tools 37.0.1 for 6000.3.26f1+, with NDK r27c and OpenJDK 17. Use the versions managed by Unity Hub to avoid mismatches.\n8. **Measure on phones.** Start with capped entities and pooling, then profile on low/mid-range Android hardware before adopting heavier effects or adding lots of bodies.
 
 ## Primary references
 
