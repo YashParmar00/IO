@@ -28,6 +28,7 @@ Run these checks after generating Main.unity in the pinned Unity Editor. Record 
 - [ ] Player collisions with a different worm head/body cause game over; an AI worm that collides with another worm or leaves the arena is removed.
 - [ ] Leaving the configured arena ends the player's run.
 - [ ] Pause freezes gameplay; Resume restores it; Restart reloads the scene with timeScale at 1.
+- [ ] Backgrounding the app while playing pauses the run; returning to the foreground resumes only if the pause was automatic.
 - [ ] Best score updates in the HUD, persists after game over/backgrounding, and is restored after a fresh launch.
 
 ## Mobile checks
