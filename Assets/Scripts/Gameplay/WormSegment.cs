@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace IO.Game.Gameplay
 {
-    /// <summary>Identifies a body segment so its owner can ignore its own body during collision checks.</summary>
+    /// <summary>Identifies a body segment so the colliding head can apply its own collision rule.</summary>
     [DisallowMultipleComponent]
     public sealed class WormSegment : MonoBehaviour
     {
@@ -11,23 +11,6 @@ namespace IO.Game.Gameplay
         public void SetOwner(WormController owner)
         {
             Owner = owner;
-        }
-
-        private void OnTriggerEnter2D(Collider2D other)
-        {
-            if (Owner == null)
-                return;
-
-            WormController otherHead = other.GetComponentInParent<WormController>();
-            if (otherHead != null && otherHead != Owner)
-            {
-                Owner.HandleCollisionWith(otherHead);
-                return;
-            }
-
-            WormSegment otherSegment = other.GetComponentInParent<WormSegment>();
-            if (otherSegment != null && otherSegment.Owner != null && otherSegment.Owner != Owner)
-                Owner.HandleCollisionWith(otherSegment.Owner);
         }
     }
 }
