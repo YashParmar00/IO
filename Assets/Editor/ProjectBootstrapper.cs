@@ -156,7 +156,7 @@ namespace IO.Game.EditorTools
             body.interpolation = RigidbodyInterpolation2D.Interpolate;
 
             CircleCollider2D collider = player.AddComponent<CircleCollider2D>();
-            collider.isTrigger = false;
+            collider.isTrigger = true;
             collider.radius = 0.44f;
 
             player.AddComponent<PlayerController>();
