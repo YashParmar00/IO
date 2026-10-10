@@ -23,6 +23,9 @@ namespace IO.Game.Gameplay
 
         private void Awake()
         {
+            if (segmentPrefab == null)
+                Debug.LogError("WormBody requires a BodySegment prefab reference.", this);
+
             if (gameConfig != null)
             {
                 segmentSpacing = gameConfig.SegmentSpacing;
