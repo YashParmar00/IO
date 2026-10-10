@@ -50,7 +50,6 @@ namespace IO.Game.Player
                 heading = new Vector2(Mathf.Cos(radians), Mathf.Sin(radians)).normalized;
             }
 
-            transform.up = heading;
         }
 
         private void FixedUpdate()
@@ -59,10 +58,17 @@ namespace IO.Game.Player
                 return;
 
             Vector2 nextPosition = (Vector2)transform.position + heading * moveSpeed * Time.fixedDeltaTime;
+            float rotationZ = Mathf.Atan2(heading.y, heading.x) * Mathf.Rad2Deg - 90f;
+
             if (body != null)
+            {
+                body.MoveRotation(rotationZ);
                 body.MovePosition(nextPosition);
+            }
             else
-                transform.position = nextPosition;
+            {
+                transform.SetPositionAndRotation(nextPosition, Quaternion.Euler(0f, 0f, rotationZ));
+            }
         }
 
         public void SetSteeringTarget(Vector2 worldPosition) => externalTarget = worldPosition;
