@@ -53,6 +53,13 @@ namespace IO.Game.Gameplay
                 SpawnFood();
         }
 
+        public bool IsInsideArena(Vector3 position)
+        {
+            Vector3 center = transform.position;
+            return Mathf.Abs(position.x - center.x) <= arenaSize.x * 0.5f
+                && Mathf.Abs(position.y - center.y) <= arenaSize.y * 0.5f;
+        }
+
         public FoodItem GetNearestFood(Vector3 position)
         {
             FoodItem nearest = null;
