@@ -6,6 +6,8 @@
 **Decision principle:** Decide the system boundaries now; implement one verified phase at a time.
 
 > This document records the current product and technical proposal so future work can proceed in small, reviewable stages without casually replacing the architecture later. Numbers labelled “target” or “provisional” are starting values for playtesting, not proven balance or production capacity. Do not install networking/backend packages or add multiplayer runtime code merely because this document exists.
+>
+> For feature coverage and priority, use [FEATURE_INVENTORY.md](FEATURE_INVENTORY.md). For screen transitions, reconnect/error handling, result and shop journeys, use [GAME_FLOWS.md](GAME_FLOWS.md). For phase sequencing, use [ROADMAP.md](ROADMAP.md). These documents complement this technical design; they do not mean the features are implemented.
 
 ## 1. Goals and non-goals
 
