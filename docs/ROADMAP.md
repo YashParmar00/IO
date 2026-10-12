@@ -1,40 +1,117 @@
 # Implementation Roadmap
 
-## Phase 1 — Source architecture
-- [x] Repository layout and Unity Editor baseline pin
-- [x] Shared GameConfig ScriptableObject class
-- [x] GameManager and camera-follow components
-- [x] Dedicated input reader and movement controller
-- [x] Dedicated WormBody trail/growth system
-- [x] WormController for game rules and ownership
-- [x] Dedicated trigger collision handler and tail segment marker
-- [x] ArenaBounds shared by food placement and worm exits
-- [x] Pooled food, score/growth values, and nearest-food lookup
-- [x] Basic interval-based local AI
-- [x] Score HUD, pause/game-over/restart UI code
-- [x] One-click Editor generator for scene/prefabs/GameConfig/placeholder sprites
-- [x] Detailed README, runtime architecture and test plan
-- [x] GitHub Actions repository sanity workflow
-- [ ] Run generator in Unity Editor and inspect Console/references
-- [ ] Verify C# compilation and package import in pinned Editor
-- [ ] Verify full food-to-growth loop and tune movement/collisions
-- [ ] Test UI, score persistence and restart
-- [ ] Test on Android devices and profile
+This roadmap separates the current offline foundation from future multiplayer work. The multiplayer design is documented in [MULTIPLAYER_DESIGN.md](MULTIPLAYER_DESIGN.md). That document is the source of truth for the provisional 16-slot cap, mode rules, server authority, progression, economy and open decisions.
 
-## Phase 2 — Game feel
-- [ ] Replace placeholder circles with original art, animation, audio, haptics and feedback
-- [ ] Add boost/power-up data and cooldown balancing
-- [ ] Improve bot navigation, safe spawn logic and collision fairness
-- [ ] Add polished menu, pause/game-over panels and settings
-- [ ] Add tests for gameplay rules and spawn/collision edge cases
+**Working rule:** complete one phase and its exit gate before starting the next. A design decision does not mean the feature is implemented or production-ready.
 
-## Phase 3 — Release readiness
-- [ ] Configure app identifier, icons, orientation, signing and Android build
-- [ ] Test varied screen sizes, background/foreground transitions, low memory and long sessions
-- [ ] Add crash reporting/analytics only after privacy review and consent requirements
-- [ ] Evaluate local/cloud progression requirements
-- [ ] Consider online multiplayer only with a separate server/network design
+## Phase 0 — Design and research baseline (current)
 
-## Definition of done for the first playable
+- [x] Record intended match modes and implementation order.
+- [x] Record a provisional maximum of 16 combatant slots per match, including bots.
+- [x] Define candidate server/network/backend boundaries.
+- [x] Define proposed player profile, XP/level rules and a single soft-currency economy.
+- [x] Record security principles, flows, official references, vendor alternatives and open questions.
+- [ ] Review and approve open design questions before adding multiplayer runtime dependencies.
+- [ ] Update the decision log when a proposed rule or provider choice changes.
 
-A clean clone opens in the pinned Unity Editor, resolves packages, compiles without errors, generates the demo scene without missing references, and plays without runtime exceptions. Player movement feels consistent, food collection drives score and growth, valid collisions/arena exits end the run correctly, pause/restart works, high score persists, and performance is acceptable on a real Android phone.
+**Exit gate:** scope, ownership of trusted data and unanswered decisions are clear. No online code is required in this phase.
+
+## Phase 1 — Offline source architecture (mostly complete; Unity validation remains)
+
+- [x] Repository layout and pinned Unity Editor baseline.
+- [x] Shared GameConfig ScriptableObject class.
+- [x] GameManager and camera-follow components.
+- [x] Dedicated input reader and movement controller.
+- [x] WormBody trail/growth system and WormController gameplay coordination.
+- [x] Trigger collision handler, tail segment marker and shared ArenaBounds.
+- [x] Pooled food, score/growth values and nearest-food lookup.
+- [x] Basic interval-based local AI.
+- [x] Score HUD, pause/game-over/restart UI code.
+- [x] Editor generator for scene, prefabs, config and placeholder sprites.
+- [x] Documentation, test plan and repository sanity workflow.
+- [ ] Open the project in the pinned Unity Editor and run the generator.
+- [ ] Verify package import, C# compilation, Console and generated references.
+- [ ] Verify food → growth → collision → game-over → restart flow.
+- [ ] Verify pause/background behaviour and local best-score persistence.
+- [ ] Test on Android hardware and record baseline performance.
+
+**Exit gate:** the offline project compiles and the first-playable checklist passes. The generator and static checks alone do not prove this.
+
+## Phase 2 — Game feel and reusable rules
+
+- [ ] Replace placeholder art as appropriate with original game assets and feedback.
+- [ ] Tune steering, arena size, food density, bots and collision fairness on device.
+- [ ] Add reproducible tests for food consumption, collision outcomes, score changes and safe spawning.
+- [ ] Extract reusable mode-independent rules only where tested behaviour warrants it.
+- [ ] Define shared match start/end/result concepts without adding online dependencies prematurely.
+
+**Exit gate:** the offline rules are stable enough to serve as a reference for server simulation.
+
+## Phase 3 — Multiplayer technology spike (proof of concept only)
+
+- [ ] Create a disposable proof-of-concept scene or branch for NGO + Unity Transport.
+- [ ] Run a local dedicated server with two clients and validate server ownership.
+- [ ] Synchronize a narrow vertical slice (input, movement, collision and one match result).
+- [ ] Validate pinned Editor compatibility, headless/server builds, reconnects and authority semantics.
+- [ ] Simulate 16 slots and measure CPU, memory, bandwidth and client frame time with target food/body counts.
+- [ ] Compare provider allocation workflows, South Asia latency, logs, scaling and realistic monthly cost.
+- [ ] Resolve secure server-to-backend authentication and trusted result submission.
+- [ ] Choose package versions and vendors based on spike evidence.
+
+**Exit gate:** document the selected stack, alternatives rejected, metrics, cost assumptions and remaining risks. Do not add the full shop/profile system in this spike.
+
+## Phase 4 — Online FFA vertical slice
+
+- [ ] Implement dedicated match lifecycle, join validation, server-authoritative movement and food/body simulation.
+- [ ] Implement validated collision outcomes, respawns, score, match timer and result summary.
+- [ ] Add the selected lobby/queue/allocation adapter.
+- [ ] Add disconnect handling and basic server logs.
+- [ ] Test malformed/spammed input, spoofed movement, fake scores, double joins, disconnects and server restarts.
+- [ ] Validate several clients first, then the full 16-slot target.
+
+**Exit gate:** the FFA match is repeatable and the client cannot choose authoritative movement, score or winner.
+
+## Phase 5 — Persistent profile, XP, Coins and cosmetics
+
+- [ ] Confirm authentication/profile services, data limits, quotas and operating costs.
+- [ ] Implement versioned profile data and server-authorized XP/level grants.
+- [ ] Implement configurable reward policy and protection against AFK/reward farming.
+- [ ] Implement one soft currency, catalogue, owned inventory and equip state.
+- [ ] Implement atomic/idempotent purchases with server-side prices and balances.
+- [ ] Test retries, duplicate transaction IDs, insufficient balances, already-owned items, reconnects and schema migration.
+- [ ] Review privacy, abuse limits and long-term earning/spending balance.
+
+**Exit gate:** profiles, match rewards and shop operations use trusted backend writes and survive retries without double rewards or charges.
+
+## Phase 6 — Team Deathmatch
+
+- [ ] Add server team assignment, team scores and team-specific collision rules.
+- [ ] Add respawn logic, timer/score-limit result rules and tie handling.
+- [ ] Validate 4v4 before attempting larger teams.
+- [ ] Consider 8v8 only if measured server/client budgets pass within the 16-slot cap.
+
+**Exit gate:** team assignment, scoring and winner calculation are server-owned and covered by reproducible tests.
+
+## Phase 7 — Survival Royale
+
+- [ ] Add no-respawn mode and authoritative placement/winner calculation.
+- [ ] Add safe-zone phases, damage and warnings using configurable data.
+- [ ] Test simultaneous eliminations, disconnects, zone ties, timer expiry and empty/lone-player cases.
+- [ ] Tune duration and zone schedule through playtests.
+
+**Exit gate:** every match resolves to a valid authoritative result under the documented edge cases.
+
+## Phase 8 — Production and live-operations readiness
+
+- [ ] Load-test real hosted instances and set resource/cost budgets.
+- [ ] Verify South Asia latency, allocation failures, scaling, crash recovery and version compatibility.
+- [ ] Add service monitoring, structured logs and recovery/rollback procedures.
+- [ ] Review privacy, consent and data retention before analytics or crash reporting.
+- [ ] Approve a release checklist and assign operational ownership.
+- [ ] Consider ranked queues, parties, missions, chat, monetization or other live-service features only as separate scoped phases.
+
+**Exit gate:** hosting costs, monitoring, support, recovery, security and release responsibilities are accepted.
+
+## First-playable definition of done (Phase 1)
+
+A clean clone opens in the pinned Unity Editor, resolves packages, compiles without errors, generates the demo scene without missing references and plays without runtime exceptions. Movement feels consistent, food collection drives score and growth, valid collisions/arena exits end the run correctly, pause/restart works, best score persists and performance is acceptable on a real Android phone.
