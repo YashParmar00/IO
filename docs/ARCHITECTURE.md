@@ -103,7 +103,7 @@ ScoreManager owns score totals and emits ScoreChanged. ScoreHUD renders those va
 
 ## Future multiplayer direction
 
-The current runtime remains an offline prototype. Future online design and phased gates are documented in [MULTIPLAYER_DESIGN.md](MULTIPLAYER_DESIGN.md) and [ROADMAP.md](ROADMAP.md).
+The current runtime remains an offline prototype. [FEATURE_INVENTORY.md](FEATURE_INVENTORY.md) is the product scope/status register, [GAME_FLOWS.md](GAME_FLOWS.md) defines end-to-end navigation and failure paths, [MULTIPLAYER_DESIGN.md](MULTIPLAYER_DESIGN.md) specifies the future online/economy design, and [ROADMAP.md](ROADMAP.md) owns phase sequencing and exit gates.
 
 The intended direction is a server-authoritative dedicated match simulation with NGO + Unity Transport as the preferred candidate, subject to a proof-of-concept spike. Mode rules, matchmaking/hosting adapters, profile progression and the soft-currency economy must remain separately owned modules. The mobile client sends input intent; it must not be trusted for position, score, match outcome, XP, wallet balance or inventory ownership.
 
