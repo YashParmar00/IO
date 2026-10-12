@@ -1,6 +1,6 @@
 # Implementation Roadmap
 
-This roadmap separates the current offline foundation from future multiplayer work. The multiplayer design is documented in [MULTIPLAYER_DESIGN.md](MULTIPLAYER_DESIGN.md). That document is the source of truth for the provisional 16-slot cap, mode rules, server authority, progression, economy and open decisions.
+This roadmap separates the current offline foundation from future multiplayer work. [MULTIPLAYER_DESIGN.md](MULTIPLAYER_DESIGN.md) is the source of truth for mode rules, server authority, progression and economy. [FEATURE_INVENTORY.md](FEATURE_INVENTORY.md) tracks all feature scope, priority and status; [GAME_FLOWS.md](GAME_FLOWS.md) tracks complete screen journeys, system transitions and failure paths. Review these three planning docs together before each implementation phase.
 
 **Working rule:** complete one phase and its exit gate before starting the next. A design decision does not mean the feature is implemented or production-ready.
 
@@ -10,7 +10,12 @@ This roadmap separates the current offline foundation from future multiplayer wo
 - [x] Record a provisional maximum of 16 combatant slots per match, including bots.
 - [x] Define candidate server/network/backend boundaries.
 - [x] Define proposed player profile, XP/level rules and a single soft-currency economy.
-- [x] Record security principles, flows, official references, vendor alternatives and open questions.
+- [x] Record security principles, technical research, vendor alternatives and open questions.
+- [x] Add prioritized feature inventory covering gameplay, screens, multiplayer, progression, safety, settings and live operations.
+- [x] Add end-to-end user/system flows for first launch, offline play, matchmaking, gameplay, reconnect, rewards and purchases.
+- [x] Record explicit gaps and unresolved decisions rather than treating common genre features as already agreed.
+- [ ] Walk through each end-to-end journey and approve required versus deferred features.
+- [ ] Resolve feature-level decisions that affect the offline rules before Phase 2 is frozen.
 - [ ] Review and approve open design questions before adding multiplayer runtime dependencies.
 - [ ] Update the decision log when a proposed rule or provider choice changes.
 
@@ -67,6 +72,7 @@ This roadmap separates the current offline foundation from future multiplayer wo
 - [ ] Add the selected lobby/queue/allocation adapter.
 - [ ] Add disconnect handling and basic server logs.
 - [ ] Test malformed/spammed input, spoofed movement, fake scores, double joins, disconnects and server restarts.
+- [ ] Exercise queue cancel/timeout, full/unavailable server, version mismatch, result delay and all error states listed in GAME_FLOWS.md.
 - [ ] Validate several clients first, then the full 16-slot target.
 
 **Exit gate:** the FFA match is repeatable and the client cannot choose authoritative movement, score or winner.
@@ -79,6 +85,7 @@ This roadmap separates the current offline foundation from future multiplayer wo
 - [ ] Implement one soft currency, catalogue, owned inventory and equip state.
 - [ ] Implement atomic/idempotent purchases with server-side prices and balances.
 - [ ] Test retries, duplicate transaction IDs, insufficient balances, already-owned items, reconnects and schema migration.
+- [ ] Verify the full shop flow: load → inspect → purchase → authoritative refresh → equip, including ambiguous/retried results.
 - [ ] Review privacy, abuse limits and long-term earning/spending balance.
 
 **Exit gate:** profiles, match rewards and shop operations use trusted backend writes and survive retries without double rewards or charges.
