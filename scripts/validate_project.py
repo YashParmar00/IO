@@ -125,9 +125,31 @@ def main() -> None:
     if missing_design_tokens:
         fail("docs/MULTIPLAYER_DESIGN.md is missing expected decision(s): " + ", ".join(missing_design_tokens))
 
+    design = (ROOT / "docs/MULTIPLAYER_DESIGN.md").read_text(encoding="utf-8")
+    required_design_tokens = [
+        "16 combatant slots", "Free-for-All (FFA)", "Team Deathmatch",
+        "Survival Royale", "Authoritative dedicated game server", "Coins",
+    ]
+    missing_design_tokens = [token for token in required_design_tokens if token not in design]
+    if missing_design_tokens:
+        fail("docs/MULTIPLAYER_DESIGN.md is missing expected decision(s): " + ", ".join(missing_design_tokens))
+
+    inventory = (ROOT / "docs/FEATURE_INVENTORY.md").read_text(encoding="utf-8")
+    required_inventory_tokens = ["GAME-01", "MODE-01", "ECON-01", "SAFE-01", "Definition of a complete feature"]
+    missing_inventory_tokens = [token for token in required_inventory_tokens if token not in inventory]
+    if missing_inventory_tokens:
+        fail("docs/FEATURE_INVENTORY.md is missing expected feature coverage: " + ", ".join(missing_inventory_tokens))
+
+    flow = (ROOT / "docs/GAME_FLOWS.md").read_text(encoding="utf-8")
+    required_flow_tokens = ["Online matchmaking and match lifecycle", "Connection lost and reconnect flow", "Shop, purchase and cosmetic equip flow", "Global error-state inventory"]
+    missing_flow_tokens = [token for token in required_flow_tokens if token not in flow]
+    if missing_flow_tokens:
+        fail("docs/GAME_FLOWS.md is missing expected user/system flows: " + ", ".join(missing_flow_tokens))
+
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    if "docs/MULTIPLAYER_DESIGN.md" not in readme:
-        fail("README.md should link docs/MULTIPLAYER_DESIGN.md.")
+    for link in ["docs/MULTIPLAYER_DESIGN.md", "docs/FEATURE_INVENTORY.md", "docs/GAME_FLOWS.md"]:
+        if link not in readme:
+            fail(f"README.md should link {link}.")
     documented_paths = [
         "Assets/Scripts/Config/GameConfig.cs",
         "Assets/Scripts/Input/WormInputReader.cs",
