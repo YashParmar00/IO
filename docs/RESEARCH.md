@@ -15,7 +15,7 @@ Build an original, portrait-first, offline worm-arena arcade game. Use the commo
 
 ## Architecture decisions
 
-1. **Single-player before networking.** Bots run locally and are not real multiplayer opponents. Network play needs authoritative rules, latency handling, reconnects, cheating controls, and backend infrastructure; it is a separate milestone.
+1. **Single-player before networking.** Bots run locally and are not real multiplayer opponents. Network play needs authoritative rules, latency handling, reconnects, abuse controls and backend infrastructure. A separate phased design is now recorded in [MULTIPLAYER_DESIGN.md](MULTIPLAYER_DESIGN.md); implementation remains gated on offline validation and a dedicated-server proof of concept.
 2. **Transform-driven worm path with kinematic movement.** The worm is an arcade steering object rather than a realistic rigid-body simulation. Head position advances through Rigidbody2D.MovePosition while body transforms sample the head's recent path.
 3. **Pool frequently respawned food.** Unity's UnityEngine.Pool API reduces repeated instantiate/destroy overhead and garbage-collection pressure. Keep a capped active count.
 4. **Separate responsibilities.** GameManager owns run state; PlayerController handles input and heading; WormController owns tail path/growth and arena exits; FoodSpawner owns food lifecycle; ScoreManager owns score persistence; HUD scripts only display state.
@@ -23,6 +23,18 @@ Build an original, portrait-first, offline worm-arena arcade game. Use the commo
 6. **Generate scene and prefabs inside Unity Editor.** The committed editor utility creates original placeholder sprites, PlayerWorm/BodySegment/Food prefabs, Main.unity, a camera, bots, score HUD, pause/game-over/restart UI, and Build Settings entry. Generated Unity assets are only created when the user runs the menu item.
 7. **Android toolchain:** Unity's 6000.3 dependency guide lists Android SDK Build Tools 36.0.0, command-line tools 16, and platform-tools 37.0.1 for 6000.3.26f1+, with NDK r27c and OpenJDK 17. Use the versions managed by Unity Hub to avoid mismatches.
 8. **Measure on phones.** Start with capped entities and pooling, then profile on low/mid-range Android hardware before adopting heavier effects or adding lots of bodies.
+
+## Multiplayer, progression and economy research update
+
+Reviewed: 12 October 2026. The full design, mode rules, provisional balance values, lifecycle flows, security boundaries, phase gates and open decisions are maintained in [MULTIPLAYER_DESIGN.md](MULTIPLAYER_DESIGN.md). Do not duplicate the full specification here; update that document when decisions change.
+
+- **16-slot capacity is a target, not a guarantee.** Measure head/body replication, food, physics, network traffic, CPU/RAM, bandwidth and mobile frame time before release.
+- **Dedicated authority is the direction.** Use a dedicated game simulation server for movement, collisions, score, respawn, match timer, team results and survival-zone logic. Treat the client as an input/display endpoint. A trusted backend must grant progression only from server-authorized match results.
+- **NGO + Unity Transport is a preferred candidate, not yet a production commitment.** Prove a two-client vertical slice and 16-slot performance using the pinned Editor before locking package versions. Keep match/hosting/session services behind replaceable adapters.
+- **Hosting is not selected.** Pilot Edgegap and compare PlayFab Multiplayer Servers/AWS GameLift against South Asia latency, allocation flow, headless builds, operational tooling and measured cost. Unity's direct Multiplay Hosting support ended after 31 March 2026 according to Unity docs; don't choose its legacy direct integration for a new project without verifying the replacement/continuity path.
+- **Economy service availability changed.** Unity's documentation says new Economy project sign-ups stopped on 8 September 2026. For new projects, it recommends a server-authoritative Cloud Code + Cloud Save + Remote Config approach; Unity IAP is relevant only if real-money purchases are later approved. Re-check current docs before implementing because service status and pricing can change.
+- **Initial game economy is intentionally narrow.** One soft currency (Coins), a cosmetic-only shop and no premium currency/pay-to-win for the first release. Suggested initial values remain tuning hypotheses and need earning/spending simulation.
+- **Implementation order matters:** offline correctness → reusable rules → networking/hosting spike → FFA → persistent profile/economy → TDM → Survival Royale → production operations.
 
 ## Primary references
 
