@@ -7,6 +7,8 @@ An original Unity 2D portrait mobile arcade game prototype inspired by the broad
 
 > **Multiplayer planning:** the researched, phased specification for FFA/TDM/Survival Royale, the provisional 16-slot cap, server-authoritative architecture, progression, Coins and shop flows is in [docs/MULTIPLAYER_DESIGN.md](docs/MULTIPLAYER_DESIGN.md). It is a plan, not implemented runtime functionality.
 
+> **Product planning docs:** [Feature inventory](docs/FEATURE_INVENTORY.md) tracks feature scope, priority and implementation status; [screen/user flows](docs/GAME_FLOWS.md) covers navigation, matchmaking, reconnect, rewards, shop and failure states. Both are plans, not claims that features have shipped.
+
 ## 1. Pinned toolchain
 
 - **Unity Editor:** 6000.3.26f1, pinned in ProjectSettings/ProjectVersion.txt.
@@ -81,6 +83,8 @@ docs/
   RESEARCH.md                     # Technical decisions and official references
   ROADMAP.md                      # Phases and remaining work
   MULTIPLAYER_DESIGN.md           # Phased online modes, server authority, progression and economy
+  FEATURE_INVENTORY.md            # Prioritized features, scope, status and acceptance concerns
+  GAME_FLOWS.md                   # End-to-end screens, user journeys and failure states
   TEST_PLAN.md                    # Manual Editor/mobile validation checklist
   UNITY_SETUP.md                  # How to generate and wire the demo scene
 scripts/
