@@ -39,6 +39,7 @@ REQUIRED_FILES = [
     "docs/ARCHITECTURE.md",
     "docs/GAMEPLAY.md",
     "docs/RESEARCH.md",
+    "docs/MULTIPLAYER_DESIGN.md",
     "docs/ROADMAP.md",
     "docs/TEST_PLAN.md",
     "docs/UNITY_SETUP.md",
@@ -114,7 +115,19 @@ def main() -> None:
     if 'SetObjectReference(player.GetComponent<PlayerController>(), "worldCamera", camera)' in generator:
         fail("Stale generator reference: worldCamera belongs on WormInputReader, not PlayerController.")
 
+    design = (ROOT / "docs/MULTIPLAYER_DESIGN.md").read_text(encoding="utf-8")
+    required_design_tokens = [
+        "16 combatant slots", "Free-for-All (FFA)", "Team Deathmatch",
+        "Survival Royale", "Server-authoritative dedicated game server",
+        "Coins", "Phase 4 — Online FFA vertical slice",
+    ]
+    missing_design_tokens = [token for token in required_design_tokens if token not in design]
+    if missing_design_tokens:
+        fail("docs/MULTIPLAYER_DESIGN.md is missing expected decision(s): " + ", ".join(missing_design_tokens))
+
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    if "docs/MULTIPLAYER_DESIGN.md" not in readme:
+        fail("README.md should link docs/MULTIPLAYER_DESIGN.md.")
     documented_paths = [
         "Assets/Scripts/Config/GameConfig.cs",
         "Assets/Scripts/Input/WormInputReader.cs",
