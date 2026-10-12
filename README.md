@@ -4,6 +4,9 @@ An original Unity 2D portrait mobile arcade game prototype inspired by the broad
 
 > **Current status:** the source architecture, starter systems, Editor scene generator, project documentation, and repository sanity workflow are committed. The actual Unity scene, prefab assets, and GameConfig asset are generated locally by the Editor tool. This repository has not yet been imported, compiled, or play-tested by Unity in this environment. Do not treat it as release-ready until the manual validation checklist passes.
 
+
+> **Multiplayer planning:** the researched, phased specification for FFA/TDM/Survival Royale, the provisional 16-slot cap, server-authoritative architecture, progression, Coins and shop flows is in [docs/MULTIPLAYER_DESIGN.md](docs/MULTIPLAYER_DESIGN.md). It is a plan, not implemented runtime functionality.
+
 ## 1. Pinned toolchain
 
 - **Unity Editor:** 6000.3.26f1, pinned in ProjectSettings/ProjectVersion.txt.
@@ -77,6 +80,7 @@ docs/
   GAMEPLAY.md                     # MVP scope and design guardrails
   RESEARCH.md                     # Technical decisions and official references
   ROADMAP.md                      # Phases and remaining work
+  MULTIPLAYER_DESIGN.md           # Phased online modes, server authority, progression and economy
   TEST_PLAN.md                    # Manual Editor/mobile validation checklist
   UNITY_SETUP.md                  # How to generate and wire the demo scene
 scripts/
