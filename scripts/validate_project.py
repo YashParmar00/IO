@@ -118,7 +118,7 @@ def main() -> None:
     design = (ROOT / "docs/MULTIPLAYER_DESIGN.md").read_text(encoding="utf-8")
     required_design_tokens = [
         "16 combatant slots", "Free-for-All (FFA)", "Team Deathmatch",
-        "Survival Royale", "Server-authoritative dedicated game server",
+        "Survival Royale", "Authoritative dedicated game server",
         "Coins", "Phase 4 — Online FFA vertical slice",
     ]
     missing_design_tokens = [token for token in required_design_tokens if token not in design]
