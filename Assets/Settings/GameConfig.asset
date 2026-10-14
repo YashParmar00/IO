@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ecba0844bbbaa3845bcad20e2df5edab, type: 3}
+  m_Name: GameConfig
+  m_EditorClassIdentifier: Assembly-CSharp::IO.Game.Config.GameConfig
+  targetFrameRate: 60
+  playerMoveSpeed: 4.5
+  turnSpeedDegrees: 240
+  botSpeedMultiplier: 0.9
+  segmentSpacing: 0.38
+  pathResolution: 0.06
+  maximumSegments: 500
+  arenaSize: {x: 32, y: 20}
+  targetFoodCount: 90
+  maximumPooledFood: 160
+  minimumFoodScore: 1
+  maximumFoodScore: 4
+  growthPerFood: 1
+  botDecisionInterval: 0.2
+  botWanderRadius: 8

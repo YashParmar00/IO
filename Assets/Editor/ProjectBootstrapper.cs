@@ -80,9 +80,9 @@ namespace IO.Game.EditorTools
             cameraObject.tag = "MainCamera";
             Camera camera = cameraObject.AddComponent<Camera>();
             camera.orthographic = true;
+            camera.clearFlags = CameraClearFlags.SolidColor;
             camera.orthographicSize = 7.5f;
             camera.backgroundColor = new Color(0.045f, 0.09f, 0.16f);
-            cameraObject.AddComponent<AudioListener>();
             CameraFollow cameraFollow = cameraObject.AddComponent<CameraFollow>();
             cameraObject.transform.position = new Vector3(0f, 0f, -10f);
 
@@ -99,6 +99,13 @@ namespace IO.Game.EditorTools
 
             CreateHUD(gameManager, scoreManager);
 
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene, ScenePath);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
             System.Collections.Generic.List<EditorBuildSettingsScene> buildScenes =
                 new System.Collections.Generic.List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
             int mainSceneIndex = buildScenes.FindIndex(item => item.path == ScenePath);
@@ -108,12 +115,6 @@ namespace IO.Game.EditorTools
                 buildScenes.Add(new EditorBuildSettingsScene(ScenePath, true));
 
             EditorBuildSettings.scenes = buildScenes.ToArray();
-            PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
-
-            EditorSceneManager.MarkSceneDirty(scene);
-            EditorSceneManager.SaveScene(scene, ScenePath);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
 
             Selection.activeObject = AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath);
             EditorUtility.DisplayDialog(
